@@ -1,6 +1,13 @@
 {
   "expo": {
     "name": "lifespace-app",
+    "displayName": "LifeSpaceApp",
+    "ios": {
+      "bundleIdentifier": "com.lifespace.lifespaceapp"
+    },
+    "android": {
+      "package": "com.lifespace.lifespaceapp"
+    },
     "slug": "lifespace-app",
     "version": "1.0.0",
     "orientation": "portrait",
