@@ -1,6 +1,5 @@
 import { Image } from 'expo-image';
 import { Button, Platform, StyleSheet, Text } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -8,12 +7,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
 
-import { useRouter } from 'expo-router';
-
 export default function HomeScreen() {
-  const navigation = useNavigation();
-  const router = useRouter();
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -30,10 +24,6 @@ export default function HomeScreen() {
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Design Your Own Edible Oasis</ThemedText>
         <ThemedCTA>Get Started</ThemedCTA>
-      </ThemedView>
-
-      <ThemedView style={styles.stepContainer}>
-        <Button title="🌱 Launch AR Garden" onPress={() => router.push('ARView')} />
       </ThemedView>
     </ParallaxScrollView>
   );
