@@ -1,3 +1,14 @@
+
+```
+npm install
+npx expo install
+npx expo prebuild
+
+npm install @babel/runtime
+npm install --save-dev @react-native-community/cli@latest
+  924  npm install --save-dev @react-native-community/npx expo start --clear
+```
+
 # lifespace-app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).

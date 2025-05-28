@@ -3,10 +3,16 @@
     "name": "lifespace-app",
     "displayName": "LifeSpaceApp",
     "ios": {
-      "bundleIdentifier": "com.lifespace.lifespaceapp"
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aaron9johnson.lifespaceapp"
     },
     "android": {
-      "package": "com.lifespace.lifespaceapp"
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.aaron9johnson.lifespaceapp"
     },
     "slug": "lifespace-app",
     "version": "1.0.0",
@@ -15,16 +21,6 @@
     "scheme": "lifespaceapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
-    },
     "web": {
       "bundler": "metro",
       "output": "static",
