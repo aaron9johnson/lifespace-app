@@ -1,6 +1,7 @@
 import { Button, StyleSheet, Text, type TextProps } from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useRouter } from 'expo-router';
 
 export type ThemedCTAProps = TextProps & {
   lightColor?: string;
@@ -15,12 +16,13 @@ export function ThemedCTA({
   type = 'default',
   ...rest
 }: ThemedCTAProps) {
+  const router = useRouter();
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   return (
       <Button
         title={rest.children as string} // Ensure the title is a string
-        onPress={() => {console.log("Aaron")}} // Ensure onPress is provided
+        onPress={() => router.push('/GardenAR')} // Navigate to the Garden AR screen
         color={'#ef7e47'} // Use the theme color
 
       />
