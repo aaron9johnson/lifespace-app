@@ -12,6 +12,8 @@ export default function GardenAR() {
   const sceneRef = useRef(null);
   const rendererRef = useRef(null);
   const threeCameraRef = useRef(null);
+  const plantMeshesRef = useRef([]);
+
   const [plants, setPlants] = useState([]);
 
   // useEffect(() => {
@@ -55,16 +57,90 @@ export default function GardenAR() {
 
     const animate = () => {
       requestAnimationFrame(animate);
-      plants.forEach((plant) => {
-        plant.rotation.y += 0.01;
+      plantMeshesRef.current.forEach((plant) => {
+        if (plant.rotation.y < 2.45) {
+          plant.rotation.y += 0.01;
+        }
       });
-      renderer.render(scene, camera);
-      gl.endFrameEXP();
+      renderer.render(sceneRef.current, threeCameraRef.current);
+      glRef.current.endFrameEXP();
     };
     animate();
   };
 
-  const addPlant = () => {
+  let clicks = 0;
+
+const addPlant = () => {
+  if (!sceneRef.current || !threeCameraRef.current) return;
+  clicks++;
+
+  const group = new THREE.Group();
+
+  if (clicks === 1) {
+    // Create a planter box (4 sides)
+    const colors = [0x654321, 0x654321, 0x964B00, 0x964B00]; // dark browns
+    const spacing = 0.46;
+
+    colors.forEach((color, index) => {
+      let geometry;
+      let position = new THREE.Vector3();
+
+      switch (index) {
+        case 0: geometry = new THREE.BoxGeometry(0.02, 0.25, 0.5); position.set(-spacing / 4, 0, 0); break;
+        case 1: geometry = new THREE.BoxGeometry(0.02, 0.25, 0.5); position.set(spacing / 4, 0, 0); break;
+        case 2: geometry = new THREE.BoxGeometry(0.25, 0.25, 0.02); position.set(0, 0, -spacing / 2); break;
+        case 3: geometry = new THREE.BoxGeometry(0.25, 0.25, 0.02); position.set(0, 0, spacing / 2); break;
+      }
+
+      const material = new THREE.MeshStandardMaterial({ color });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(position);
+      group.add(mesh);
+    });
+
+  } else if (clicks === 2) {
+    // Center plant
+    const geometry = new THREE.ConeGeometry(0.07, 0.2, 4);
+    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    const cone = new THREE.Mesh(geometry, material);
+    cone.position.y = 0.15;
+    group.add(cone);
+
+  } else if (clicks === 3) {
+    // Left side leaf
+    const geometry = new THREE.ConeGeometry(0.07, 0.2, 4);
+    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    const cone = new THREE.Mesh(geometry, material);
+    cone.position.y = 0.15;
+    cone.position.z = 0.15;
+    group.add(cone);
+
+  } else if (clicks === 4) {
+    // Right side leaf
+    const geometry = new THREE.ConeGeometry(0.07, 0.2, 4);
+    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    const cone = new THREE.Mesh(geometry, material);
+    cone.position.y = 0.15;
+    cone.position.z = -0.15;
+    group.add(cone);
+  }
+
+  // Slight downward tilt
+  group.rotation.x = 0.2;
+  group.rotation.y = 2;
+
+  // Start slightly further back and to the left
+  const camera = threeCameraRef.current;
+  const position = new THREE.Vector3(-0.3, 0, -2.2);
+  position.applyMatrix4(camera.matrixWorld);
+  group.position.copy(position);
+
+  sceneRef.current.add(group);
+  plantMeshesRef.current.push(group);
+};
+
+
+  const addPlantOld = () => {
     if (!sceneRef.current || !threeCameraRef.current) return;
 
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
