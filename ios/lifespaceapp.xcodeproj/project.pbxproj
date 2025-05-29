@@ -23,7 +23,7 @@
 		3AC9D112A4E600AF4FFDC31A /* Pods-lifespaceapp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lifespaceapp.release.xcconfig"; path = "Target Support Files/Pods-lifespaceapp/Pods-lifespaceapp.release.xcconfig"; sourceTree = "<group>"; };
 		824BF6CBC0309FA54D5AEE23 /* Pods-lifespaceapp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-lifespaceapp.debug.xcconfig"; path = "Target Support Files/Pods-lifespaceapp/Pods-lifespaceapp.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = lifespaceapp/SplashScreen.storyboard; sourceTree = "<group>"; };
-		B89932C97EE9E2D3C41FABB4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = lifespaceapp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B89932C97EE9E2D3C41FABB4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = lifespaceapp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		C21ABC746A7915AF49A88ABC /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-lifespaceapp/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		D027AA8B433D0BFF558E8FC1 /* libPods-lifespaceapp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-lifespaceapp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -128,7 +128,6 @@
 				824BF6CBC0309FA54D5AEE23 /* Pods-lifespaceapp.debug.xcconfig */,
 				3AC9D112A4E600AF4FFDC31A /* Pods-lifespaceapp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -336,6 +335,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = lifespaceapp/lifespaceapp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PEHCFRL7FZ;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -372,6 +372,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = lifespaceapp/lifespaceapp.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PEHCFRL7FZ;
 				INFOPLIST_FILE = lifespaceapp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -449,10 +450,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -507,10 +505,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
