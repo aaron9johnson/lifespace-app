@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 export type ThemedCTAProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
+  link?: string;
   type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
 };
 
@@ -13,18 +14,19 @@ export function ThemedCTA({
   style,
   lightColor,
   darkColor,
+  link,
   type = 'default',
   ...rest
 }: ThemedCTAProps) {
   const router = useRouter();
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
+  
   return (
       <Button
         title={rest.children as string} // Ensure the title is a string
-        onPress={() => router.push('/GardenAR')} // Navigate to the Garden AR screen
-        color={'#ef7e47'} // Use the theme color
-
+        onPress={() => router.push(link)} // Navigate to the Garden AR screen
+        color={color} // Use the theme color
       />
     );
   }
