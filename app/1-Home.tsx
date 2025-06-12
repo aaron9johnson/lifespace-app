@@ -8,7 +8,10 @@ import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
 import { Link, Stack } from 'expo-router';
 
-export default function DesignScreen() {
+import { useRouter } from 'expo-router';
+
+export default function StartScreen() {
+  const router = useRouter();
   return (
     <ThemedView style={styles.screen}>
       <ThemedView style={styles.titleContainer}>
@@ -22,7 +25,7 @@ export default function DesignScreen() {
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         {/* <ThemedText type="subtitle" style={styles.stepText}>Design Your Own Edible Oasis</ThemedText> */}
-        <ThemedText type="subtitle" style={styles.stepText}>Photo</ThemedText>
+        <ThemedText type="subtitle" style={styles.stepText}>Design</ThemedText>
         <ThemedText type="subtitle" style={styles.stepText}>Your</ThemedText>
         <ThemedText type="subtitle" style={styles.stepText}>Garden</ThemedText>
         
@@ -33,15 +36,22 @@ export default function DesignScreen() {
           style={styles.img}
         />
       </ThemedView>
-      
       <ThemedView style={styles.ctaWrapper}>
-                  <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/Home' >Get Started</ThemedCTA>
-
-        
+                  <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/2-Photo'>Get Started</ThemedCTA>
       </ThemedView>
+
       <ThemedView style={styles.ctaLogWrapper}>
         <ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'}>Login</ThemedCTA>
       </ThemedView>
+
+      
+         {/* <Button
+            title={'Photo'} // Ensure the title is a string
+            onPress={() => router.push('/photo')} // Navigate to the Garden AR screen
+            color={'#ef7e47'} // Use the theme color
+
+          /> */}
+      
     </ThemedView>
   );
 }

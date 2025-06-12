@@ -22,7 +22,17 @@ export function ThemedCTA({
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   
-  return (
+  
+    if (!link && rest.nolink) {
+      return (
+        <Button
+          title={rest.children as string} // Ensure the title is a string
+          onPress={rest.nolink()} // Navigate to the Garden AR screen
+          color={color} // Use the theme color
+        />
+      );
+    }
+    return (
       <Button
         title={rest.children as string} // Ensure the title is a string
         onPress={() => router.push(link)} // Navigate to the Garden AR screen
