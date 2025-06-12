@@ -24,16 +24,10 @@ export default function DesignScreen() {
   // const [photo, setPhoto] = useState(null);
   const [plants, setPlants] = useState([]);
   const [gardens, setGardens] = useState([]);
+  const [clicks, setClicks] = useState(0);
   const { image } = useLocalSearchParams<{ image: any; }>();
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const { status } = await Camera.requestCameraPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       alert('Camera permission required');
-  //     }
-  //   })();
-  // }, []);
+
   const { hasPermission, requestPermission } = useCameraPermission()
   const devices = Camera.getAvailableCameraDevices();
   const device = getCameraDevice(devices, 'back', {
@@ -78,11 +72,10 @@ export default function DesignScreen() {
     animate();
   };
 
-  let clicks = 0;
-
 const addPlant = () => {
   if (!sceneRef.current || !threeCameraRef.current) return;
-  clicks++;
+  setClicks(clicks + 1)
+  // clicks++;
 
   const group = new THREE.Group();
 
@@ -172,29 +165,62 @@ const addPlant = () => {
           onContextCreate={onContextCreate}
         />
       </TouchableWithoutFeedback>
-      <ThemedView style={styles.ctaContainer}>
-        <ThemedView style={styles.ctaWrapper}>
-        <Button
-          title={'Cancel'} // Ensure the title is a string
-          onPress={() => {
-            console.log("cancel")
-          }}
-          color={'#595959'}
-        />
-        </ThemedView>
-        <ThemedView style={styles.ctaWrapper2}>
+
+      { clicks > 1 ?
+        <ThemedView style={styles.ctaContainer}>
+          <ThemedView style={styles.ctaWrapper}>
           <Button
-            title={'Confirm'} // Ensure the title is a string
-            onPress={confirmDesign} // Navigate to the Garden AR screen
-            color={'#ef7e47'} // Use the theme color
+            title={'Cancel'} // Ensure the title is a string
+            onPress={() => {
+              console.log("cancel")
+            }}
+            color={'#595959'}
           />
+          </ThemedView>
+          <ThemedView style={styles.ctaWrapper2}>
+            <Button
+              title={'Confirm'} // Ensure the title is a string
+              onPress={confirmDesign} // Navigate to the Garden AR screen
+              color={'#ef7e47'} // Use the theme color
+            />
+          </ThemedView>
         </ThemedView>
+        :
+        <ThemedView style={styles.instructionContainer2}>
+          <ThemedText type="title" style={{ textAlign: 'center' }}>Place a garden</ThemedText>
+        </ThemedView>
+      }
+
+      <ThemedView style={styles.instructionContainer}>
+        <ThemedText type="title" style={{ textAlign: 'center' }}>Design your Garden</ThemedText>
       </ThemedView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  instructionContainer: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    top: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000', // transparent
+    left: 20,
+    right: 20,
+  },
+  instructionContainer2: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    bottom: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000', // transparent
+    left: 20,
+    right: 20,
+  },
   container: {
     flex: 1,
     position: 'relative',

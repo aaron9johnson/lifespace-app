@@ -15,7 +15,11 @@ export default function DesignScreen() {
     <ThemedView style={styles.screen}>
       <ThemedView style={styles.titleContainer}>
         <Image source={image} style={styles.image}></Image>
-
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <Text style={{ fontSize: 48 }}>LowRider Self-Watering Planter</Text>
+        <Text style={{ fontSize: 24 }}>***** (24)</Text>
+        <Text style={{ fontSize: 32 }}>$339.00</Text>
       </ThemedView>
 
       <View style={styles.container}>
@@ -50,7 +54,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   image: {
-    width: 200,
+    width: 300,
     height: 300,
     backgroundColor: 'white',
   },
@@ -131,7 +135,7 @@ const styles = StyleSheet.create({
     height: 64,
     fontFamily: 'Lato-Thin',
     fontSize: 64,
-    textAlign: 'center',
+    textAlign: 'left',
     textAlignVertical: 'center',
     lineHeight: 64,
     // flexDirection: 'row',
@@ -140,6 +144,23 @@ const styles = StyleSheet.create({
     color: '#595959'
   },
   ctaWrapper: {
+    backgroundColor: 'white', // orange
+    
+    borderRadius: 8,
+    borderColor: 'black',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    marginBottom: 28,
+    width: '100%',
+    height: 48,
+    lineHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 150,
+    
+  },
+  button: {
+    minWidth: 150,
     backgroundColor: '#ef7e47', // orange
     
     borderRadius: 8,
@@ -154,21 +175,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     
   },
-  // cta: {
-  //   backgroundColor: '#ef7e47', // orange
-  //   height: 48,
-  //   fontFamily: 'Lato-Regular',
-  //   fontSize: 18,
-  //   textAlign: 'center',
-  //   textAlignVertical: 'center',
-  //   lineHeight: 18,
-  //   width: '100%',
-  //   color: '#ffffff', // orange
-    
-    
-  // },
   ctaLogWrapper: {
-    color: '#ef7e47', // orange
+    color: '#696969', // orange
     fontFamily: 'Lato-Regular',
     fontSize: 18,
     textAlign: 'center',
@@ -180,21 +188,9 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderStyle: 'solid',
     borderColor: '#595959',
-    backgroundColor: 'transparent', // transparent
+    backgroundColor: 'white', // transparent
     maxWidth: 120,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // ctaLog: {
-  //   height: 48,
-  //   width: '100%',
-  //   color: '#595959', // dark grey
-  //   fontFamily: 'Lato-Regular',
-  //   fontSize: 18,
-  //   textAlign: 'center',
-  //   textAlignVertical: 'center',
-  //   lineHeight: 18,
-  //   lightColor: '#ef7e47', // orange
-    
-  // },
 });

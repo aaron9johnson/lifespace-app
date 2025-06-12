@@ -1,17 +1,16 @@
 import { ThemedView } from "@/components/ThemedView";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { Component } from "react";
-import { StyleSheet, View, Text, PanResponder, Animated, Button,  } from "react-native";
-  let plant1 = false;
-let plant2 = false;
-let plant3 = false;
+import React, { Component, useState } from "react";
+import { StyleSheet, View, Text, PanResponder, Animated, Button, ScrollView,  } from "react-native";
 
 class Draggable extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      color: props.color,
+      dropped: props.dropped,
       showDraggable: true,
       dropAreaValues: null,
       pan: new Animated.ValueXY(),
@@ -43,17 +42,21 @@ class Draggable extends Component {
   }
 
   checkDrop(e, gesture){
+    console.log('gesture: ', gesture);
+    console.log('gesture.moveX: ', gesture.moveX);
+    console.log('gesture.moveY: ', gesture.moveY);
+    console.log('color: ', e.state.color);
     let remove = false;
     if (gesture.moveY < 200){
       if (gesture.moveX > 0 && gesture.moveX < 100){
         remove = true;
-        plant1 = true;
+        e.state.dropped(1, e.state.color);
       } else if (gesture.moveX > 100 && gesture.moveX < 200){
         remove = true;
-        plant2 = true;
+        e.state.dropped(2, e.state.color);
       } else if (gesture.moveX > 200 && gesture.moveX < 300){
         remove = true;
-        plant3 = true;
+        e.state.dropped(3, e.state.color);
       }
     }
     
@@ -68,9 +71,6 @@ class Draggable extends Component {
       );
     } 
   }
-  // isDropArea(gesture) {
-  //   return gesture.moveY < 200;
-  // }
 
   render() {
     return (
@@ -89,11 +89,11 @@ class Draggable extends Component {
         <View style={{ position: "absolute" }}>
           <Animated.View
             {...this.panResponder.panHandlers}
-            style={[panStyle, styles.circle, {opacity:this.state.opacity}]}
+            style={[{backgroundColor: this.state.color },panStyle, styles.circle, {opacity:this.state.opacity}]}
           >
             <Image
               source={require('@/assets/images/cuc.png')}
-              style={styles.img}
+              style={{ backgroundColor: this.state.color }}
             />
           </Animated.View>
         </View>
@@ -106,6 +106,9 @@ class Draggable extends Component {
 export default function PlantScreen() {
   const router = useRouter();
   const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
+  const [drops1, setDrops1] = useState('black');
+  const [drops2, setDrops2] = useState('black');
+  const [drops3, setDrops3] = useState('black');
   const confirmPlanting = async () => {
     router.push({ 
       pathname: '/5-Buy',
@@ -116,21 +119,36 @@ export default function PlantScreen() {
       }
     });
   };
+  const checkDropped = (i, color) => {
+    console.log(i)
+    console.log("color me")
+    console.log(color)
+      if (i === 1) {
+        setDrops1(color);
+      } else if (i === 2) {
+        setDrops2(color);
+      } else if (i === 3) {
+        setDrops3(color);
+      }
+  };
     return (
       <View style={styles.mainContainer}>
         <View style={styles.dropZone}>
           {/* <Text style={styles.text}>Drop them here!</Text> */}
-          <View style={!plant1 ? styles.dropZone1 : styles.dropZone1f}></View>
-          <View style={!plant2 ? styles.dropZone2 : styles.dropZone2f}></View>
-          <View style={!plant3 ? styles.dropZone3 : styles.dropZone3f}></View>
+          <View style={[ { backgroundColor: drops1 }, drops1 != "#000000" ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops1 } ]}></View>
+          <View style={[ { backgroundColor: drops2 }, drops2 != "#000000" ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops2 }]}></View>
+          <View style={[ { backgroundColor: drops3 }, drops3 != "#000000" ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops3 }]}></View>
         </View>
         <View style={styles.ballContainer} />
         <View style={styles.row}>
-          <Draggable />
-          <Draggable />
-          <Draggable />
-          <Draggable />
-          <Draggable />
+            <Draggable dropped={checkDropped} color={'white'}/>
+            <Draggable dropped={checkDropped} color={'purple'}/>
+            <Draggable dropped={checkDropped} color={'red'}/>
+            <Draggable dropped={checkDropped} color={'blue'}/>
+            <Draggable dropped={checkDropped} color={'green'}/>
+            <Draggable dropped={checkDropped} color={'green'}/>
+            <Draggable dropped={checkDropped} color={'yellow'}/>
+            
         </View>
         <ThemedView style={styles.ctaContainer}>
           <ThemedView style={styles.ctaWrapper}>
@@ -149,6 +167,10 @@ export default function PlantScreen() {
 
 let CIRCLE_RADIUS = 30;
 const styles = StyleSheet.create({
+  ctaContainer: {
+    top: 200,
+
+  },
   img: {
     height: 60,
     width: 60,
@@ -162,17 +184,20 @@ const styles = StyleSheet.create({
     height:200
   },
   circle: {
-    backgroundColor: "skyblue",
+    // backgroundColor: "skyblue",
     width: CIRCLE_RADIUS * 2,
     height: CIRCLE_RADIUS * 2,
     borderRadius: CIRCLE_RADIUS
   },
   row: {
-    flexDirection: "row"
+    flexDirection: "row",
+    flexWrap: "wrap",
+    height: 200,
+    justifyContent: "space-around",
   },  
   dropZone: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    // justifyContent: "space-around",
     alignItems: "center",
   },
   dropZone1: {

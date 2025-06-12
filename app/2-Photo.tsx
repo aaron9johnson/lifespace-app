@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps} from 'react-native';
+import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps, TouchableOpacity} from 'react-native';
 import { Camera, useCameraPermission, getCameraDevice } from 'react-native-vision-camera';
 import { Image } from 'expo-image';
 import { ThemedText } from '@/components/ThemedText';
@@ -20,6 +20,7 @@ export default function PhotoScreen() {
   const device = getCameraDevice(devices, 'back', {
     physicalDevices: ['wide-angle-camera']
   })
+  const [takingPhoto, setTakingPhoto] = useState(true);
 
   if (!hasPermission) {
     requestPermission();
@@ -51,6 +52,7 @@ export default function PhotoScreen() {
   const renderCamera = () => {
     return (
       <ThemedView style={styles.cameraContainer}>
+        
         <Camera
           ref={cameraRef}
           style={StyleSheet.absoluteFill}
@@ -58,14 +60,19 @@ export default function PhotoScreen() {
           isActive={true}
           photo={true}
         />
-        <ThemedView style={styles.buttonCamera}>
+        <ThemedView style={ takingPhoto ? styles.buttonCamera : styles.buttonCameraPhoto}>
           <Button
-            title={'capture'} // Ensure the title is a string
+            title={' '} // Ensure the title is a string
             onPress={() => {
-              takePhoto(); // Call the takePhoto function
+              setTakingPhoto(false);
+              takePhoto();
+              // takePhoto(); // Call the takePhoto function
             }} // Navigate to the Garden AR screen
             color={'#000000'} // Use the theme color
           />
+        </ThemedView>
+        <ThemedView style={styles.instructionContainer}>
+          <ThemedText type="title" style={{ textAlign: 'center' }}>Where would you like to plan your garden?</ThemedText>
         </ThemedView>
       </ThemedView>
     );
@@ -75,24 +82,28 @@ export default function PhotoScreen() {
       <ThemedView style={styles.imageContainer}>
         <Image source={image} style={styles.image}></Image>
         <ThemedView style={styles.ctaContainer}>
-          <ThemedView style={styles.ctaWrapper}>
-          <Button
-            title={'Retake'} // Ensure the title is a string
-            onPress={() => {
-              setImage(null);
-            }}
-            color={'#595959'}
-          />
+          <ThemedView style={ styles.ctaWrapper }>
+            <Button
+              title={'Retake'} // Ensure the title is a string
+              onPress={() => {
+                setImage(null);
+                setTakingPhoto(true);
+              }}
+              color={'#595959'}
+            />
           </ThemedView>
           <ThemedView style={styles.ctaWrapper2}>
-            <Button
-              title={'Confirm'} // Ensure the title is a string
+            <TouchableOpacity
               onPress={() => {
                 confirmPhoto(); // Call the takePhoto function
               }} // Navigate to the Garden AR screen
-              color={'#ef7e47'} // Use the theme color
-            />
+            >
+              <ThemedText type="title" style={{ textAlign: 'center', color: '#ef7e47' }}>Confirm</ThemedText>
+            </TouchableOpacity>
           </ThemedView>
+        </ThemedView>
+        <ThemedView style={styles.instructionContainerBottom}>
+          <ThemedText type="title" style={{ textAlign: 'center' }}>Use this Photo?</ThemedText>
         </ThemedView>
       </ThemedView>
     );
@@ -105,6 +116,28 @@ export default function PhotoScreen() {
 }
 
 const styles = StyleSheet.create({
+  instructionContainer: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    top: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000', // transparent
+    left: 20,
+    right: 20,
+  },
+  instructionContainerBottom: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    bottom: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000', // transparent
+    left: 20,
+    right: 20,
+  },
   container: {
     width: '100%',
     height: '100%',
@@ -118,12 +151,26 @@ const styles = StyleSheet.create({
   },
   buttonCamera: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 40,
     padding: 10,
     backgroundColor: 'transparent',
-    borderRadius: 25,
-    borderWidth: 1,
+    borderRadius: 37,
+    borderWidth: 6,
     borderColor: '#ffffff',
+    width: 75,
+    height: 75,
+  },
+  buttonCameraPhoto: {
+    position: 'absolute',
+    bottom: 40,
+    padding: 10,
+    backgroundColor: 'transparent',
+    borderRadius: 37,
+    borderWidth: 6,
+    borderColor: '#ffffff',
+    width: 75,
+    height: 75,
+    opacity: 0.5,
   },
   imageContainer: {
     justifyContent: 'center',
