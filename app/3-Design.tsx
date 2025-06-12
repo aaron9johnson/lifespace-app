@@ -23,6 +23,7 @@ export default function DesignScreen() {
   const plantMeshesRef = useRef([]);
   // const [photo, setPhoto] = useState(null);
   const [plants, setPlants] = useState([]);
+  const [gardens, setGardens] = useState([]);
   const { image } = useLocalSearchParams<{ image: any; }>();
 
   // useEffect(() => {
@@ -152,8 +153,8 @@ const addPlant = () => {
       pathname: '/4-Plant',
       params: {
         image: image,
-        gardens: JSON.stringify([{model: 'Test'}]),
-        plants: JSON.stringify({name: 'Test Plant', type: 'Test Type', size: 'Medium', color: 'Green'}),
+        gardens: gardens,
+        plants: plants,
       }
     });
   };

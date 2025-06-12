@@ -23,11 +23,20 @@ export function ThemedCTA({
 
   
   
-    if (!link && rest.nolink) {
+    // if (!link && rest.nolink) {
+    //   return (
+    //     <Button
+    //       title={rest.children as string} // Ensure the title is a string
+    //       onPress={rest.nolink()} // Navigate to the Garden AR screen
+    //       color={color} // Use the theme color
+    //     />
+    //   );
+    // }
+    if (!link) { 
       return (
         <Button
           title={rest.children as string} // Ensure the title is a string
-          onPress={rest.nolink()} // Navigate to the Garden AR screen
+          onPress={() => router.push('/1-Home')} // Navigate to the Garden AR screen
           color={color} // Use the theme color
         />
       );

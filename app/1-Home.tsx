@@ -37,11 +37,11 @@ export default function StartScreen() {
         />
       </ThemedView>
       <ThemedView style={styles.ctaWrapper}>
-                  <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/2-Photo'>Get Started</ThemedCTA>
+        <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/2-Photo'>Get Started</ThemedCTA>
       </ThemedView>
 
       <ThemedView style={styles.ctaLogWrapper}>
-        <ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'}>Login</ThemedCTA>
+        <ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'} link='/Login' >Login</ThemedCTA>
       </ThemedView>
 
       

@@ -1,52 +1,59 @@
 import { Image } from 'expo-image';
-import { Button, Platform, StyleSheet, Text, ViewComponent } from 'react-native';
+import { Button, Linking, Platform, StyleSheet, Text, TouchableOpacity, View, ViewComponent } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
-import { Link, Stack } from 'expo-router';
+import { Link, useRouter, Stack, useLocalSearchParams } from 'expo-router';
 
 export default function DesignScreen() {
+  const router = useRouter();
+  const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
   return (
     <ThemedView style={styles.screen}>
       <ThemedView style={styles.titleContainer}>
-        {/* <ThemedText type="title" style={styles.titleText}>LifeSpace</ThemedText> */}
-        {/* <HelloWave /> */}
-        <Image
-          source={require('@/assets/images/logo.png')}
-          style={styles.reactLogo}
-        />
+        <Image source={image} style={styles.image}></Image>
 
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        {/* <ThemedText type="subtitle" style={styles.stepText}>Design Your Own Edible Oasis</ThemedText> */}
-        <ThemedText type="subtitle" style={styles.stepText}>Photo</ThemedText>
-        <ThemedText type="subtitle" style={styles.stepText}>Your</ThemedText>
-        <ThemedText type="subtitle" style={styles.stepText}>Garden</ThemedText>
-        
-      </ThemedView>
-      <ThemedView style={styles.imgContainer}>
-        <Image
-          source={require('@/assets/images/low.png')}
-          style={styles.img}
-        />
-      </ThemedView>
+
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.button} onPress={ ()=>{ Linking.openURL('https://lifespace-projects.myshopify.com/cart/31911805157430:1')}}>
+          <Text style={styles.buttonText}>Checkout</Text>
+        </TouchableOpacity>
+      </View>
       
-      <ThemedView style={styles.ctaWrapper}>
-                  <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/6-Home' >Home</ThemedCTA>
-
-        
-      </ThemedView>
       <ThemedView style={styles.ctaLogWrapper}>
-        <ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'}>Login</ThemedCTA>
+        <TouchableOpacity style={styles.ctaWrapper} onPress={() => {
+          router.dismissAll()
+          router.replace({ 
+            pathname: '/6-Home',
+            params: {
+              image: image,
+              gardens: gardens,
+              plants: plants,
+            }
+          });
+        }}>
+          <Text style={styles.ctaText}>Later</Text>
+        </TouchableOpacity>
       </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  titleContainer: {
+    width: '100%',
+    height: 128,
+    position: 'relative',
+  },
+  image: {
+    width: 200,
+    height: 300,
+    backgroundColor: 'white',
+  },
   reactLogo: {
     width: '100%',
     height: 200,

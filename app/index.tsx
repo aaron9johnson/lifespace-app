@@ -1,27 +1,38 @@
 import * as React from 'react';
-import { Button, StyleSheet, Text, type TextProps } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, type TextProps } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function Index() {
   const router = useRouter();
 
-  // router.push('/1-Home'); // jnust go
-
+  React.useEffect(() => {
+    (async () => {
+      router.dismissAll()
+      router.replace('/1-Home')
+    })();
+  }, []);
+  
   return (
     <ThemedView style={styles.container}>
-      <Button
-        title={'1-Home'} // Ensure the title is a string
-        onPress={() => router.push('/1-Home')} // Navigate to the Garden AR screen
-        color={'#ef7e47'} // Use the theme color
-
-      />
-      <Button
-        title={'2-Photo'} // Ensure the title is a string
-        onPress={() => router.push('/2-Photo')} // Navigate to the Garden AR screen
-        color={'#ef7e47'} // Use the theme color
-
-      />
+      <TouchableOpacity style={styles.cta} onPress={() => {
+          router.dismissAll()
+          router.replace('/1-Home')
+        }}>
+        <Text style={styles.ctaText}>Home</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.cta} onPress={() => {
+          router.dismissAll()
+          router.replace('/4-Plant')
+        }}>
+        <Text style={styles.ctaText}>Plant</Text>
+      </TouchableOpacity>
+        <TouchableOpacity style={styles.cta} onPress={() => {
+          router.dismissAll()
+          router.replace('/6-Home')
+        }}>
+        <Text style={styles.ctaText}>Home6</Text>
+      </TouchableOpacity>
     </ThemedView>
     
   );
@@ -53,6 +64,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 10,
     margin: 5,
+  },
+  cta: {
+    borderColor: 'black',
+    borderWidth: 1,
+    backgroundColor: 'white',
+    padding: 10,
+    margin: 5,
+  },
+  ctaText: {
+    padding: 10,
   },
 });
 

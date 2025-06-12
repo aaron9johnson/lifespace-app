@@ -1,52 +1,42 @@
 import { Image } from 'expo-image';
-import { Button, Platform, StyleSheet, Text, ViewComponent } from 'react-native';
+import { Button, Platform, StyleSheet, Text, TouchableOpacity, ViewComponent } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
-import { Link, Stack } from 'expo-router';
+import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 export default function DesignScreen() {
+  const router = useRouter();
+  const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
   return (
     <ThemedView style={styles.screen}>
-      <ThemedView style={styles.titleContainer}>
-        {/* <ThemedText type="title" style={styles.titleText}>LifeSpace</ThemedText> */}
-        {/* <HelloWave /> */}
-        <Image
-          source={require('@/assets/images/logo.png')}
-          style={styles.reactLogo}
-        />
-
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        {/* <ThemedText type="subtitle" style={styles.stepText}>Design Your Own Edible Oasis</ThemedText> */}
-        <ThemedText type="subtitle" style={styles.stepText}>Photo</ThemedText>
-        <ThemedText type="subtitle" style={styles.stepText}>Your</ThemedText>
-        <ThemedText type="subtitle" style={styles.stepText}>Garden</ThemedText>
-        
+        <ThemedText type="subtitle" style={styles.stepText}>Home</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.imgContainer}>
-        <Image
-          source={require('@/assets/images/low.png')}
-          style={styles.img}
-        />
-      </ThemedView>
+      <ThemedView style={styles.titleContainer}>
+              <Image source={image} style={styles.image}></Image>
       
+            </ThemedView>
       <ThemedView style={styles.ctaWrapper}>
-                  <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/1-Home' >Get Started</ThemedCTA>
-
-        
-      </ThemedView>
-      <ThemedView style={styles.ctaLogWrapper}>
-        <ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'}>Login</ThemedCTA>
+        <TouchableOpacity style={styles.cta} onPress={() => {
+          router.dismissAll()
+          router.replace('/1-Home')
+        }}>
+          <Text style={styles.ctaText}>Home</Text>
+        </TouchableOpacity>
       </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  image:{
+    height: 300,
+    width: 200,
+  },
   reactLogo: {
     width: '100%',
     height: 200,
@@ -133,6 +123,37 @@ const styles = StyleSheet.create({
     color: '#595959'
   },
   ctaWrapper: {
+    backgroundColor: '#ef7e47', // orange
+    
+    borderRadius: 8,
+    borderColor: '#ef7e47',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    marginBottom: 28,
+    width: '100%',
+    height: 48,
+    lineHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    
+  },
+  cta: {
+    backgroundColor: '#ef7e47', // orange
+    
+    borderRadius: 8,
+    borderColor: '#ef7e47',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    marginBottom: 28,
+    width: '100%',
+    height: 48,
+    lineHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    
+  },
+  ctaText: {
+    color: '#ffffff', // white
     backgroundColor: '#ef7e47', // orange
     
     borderRadius: 8,

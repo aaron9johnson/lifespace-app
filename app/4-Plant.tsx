@@ -1,141 +1,235 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps} from 'react-native';
-import { Camera, useCameraPermission, getCameraDevice } from 'react-native-vision-camera';
-import { Image } from 'expo-image';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedCTA } from '@/components/ThemedCTA';
-import { ThemedView } from '@/components/ThemedView';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ThemedView } from "@/components/ThemedView";
+import { Image } from "expo-image";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { Component } from "react";
+import { StyleSheet, View, Text, PanResponder, Animated, Button,  } from "react-native";
+  let plant1 = false;
+let plant2 = false;
+let plant3 = false;
+
+class Draggable extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      showDraggable: true,
+      dropAreaValues: null,
+      pan: new Animated.ValueXY(),
+      opacity: new Animated.Value(1)
+    };
+  }
+
+  componentWillMount() {
+    this._val = { x:0, y:0 }
+    this.state.pan.addListener((value) => this._val = value);
+
+    this.panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: (e, gesture) => true,
+        onPanResponderGrant: (e, gesture) => {
+          this.state.pan.setOffset({
+            x: this._val.x,
+            y:this._val.y
+          })
+          this.state.pan.setValue({ x:0, y:0})
+        },
+        onPanResponderMove: Animated.event([ 
+          null, { dx: this.state.pan.x, dy: this.state.pan.y }
+        ]),
+        onPanResponderRelease: (e, gesture) => {
+          this.checkDrop(this, gesture)
+          
+        }
+      });
+  }
+
+  checkDrop(e, gesture){
+    let remove = false;
+    if (gesture.moveY < 200){
+      if (gesture.moveX > 0 && gesture.moveX < 100){
+        remove = true;
+        plant1 = true;
+      } else if (gesture.moveX > 100 && gesture.moveX < 200){
+        remove = true;
+        plant2 = true;
+      } else if (gesture.moveX > 200 && gesture.moveX < 300){
+        remove = true;
+        plant3 = true;
+      }
+    }
+    
+    if (remove) {
+      Animated.timing(e.state.opacity, {
+        toValue: 0,
+        duration: 1000
+      }).start(() =>
+        e.setState({
+          showDraggable: false
+        })
+      );
+    } 
+  }
+  // isDropArea(gesture) {
+  //   return gesture.moveY < 200;
+  // }
+
+  render() {
+    return (
+      <View style={{ width: "20%", alignItems: "center" }}>
+        {this.renderDraggable()}
+      </View>
+    );
+  }
+
+  renderDraggable() {
+    const panStyle = {
+      transform: this.state.pan.getTranslateTransform()
+    }
+    if (this.state.showDraggable) {
+      return (
+        <View style={{ position: "absolute" }}>
+          <Animated.View
+            {...this.panResponder.panHandlers}
+            style={[panStyle, styles.circle, {opacity:this.state.opacity}]}
+          >
+            <Image
+              source={require('@/assets/images/cuc.png')}
+              style={styles.img}
+            />
+          </Animated.View>
+        </View>
+      );
+    }
+  }
+}
+
 
 export default function PlantScreen() {
   const router = useRouter();
   const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
-
-  const confirmPhoto = async () => {
-    console.log('confirmPhoto: ', image);
+  const confirmPlanting = async () => {
     router.push({ 
-      pathname: '/3-Design',
+      pathname: '/5-Buy',
       params: {
-        image: image
+        image: image,
+        gardens: gardens,
+        plants: plants,
       }
     });
   };
-  
-  return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.imageContainer}>
-        <Image source={image} style={styles.image}></Image>
+    return (
+      <View style={styles.mainContainer}>
+        <View style={styles.dropZone}>
+          {/* <Text style={styles.text}>Drop them here!</Text> */}
+          <View style={!plant1 ? styles.dropZone1 : styles.dropZone1f}></View>
+          <View style={!plant2 ? styles.dropZone2 : styles.dropZone2f}></View>
+          <View style={!plant3 ? styles.dropZone3 : styles.dropZone3f}></View>
+        </View>
+        <View style={styles.ballContainer} />
+        <View style={styles.row}>
+          <Draggable />
+          <Draggable />
+          <Draggable />
+          <Draggable />
+          <Draggable />
+        </View>
         <ThemedView style={styles.ctaContainer}>
           <ThemedView style={styles.ctaWrapper}>
-          <Button
-            title={'Retake'} // Ensure the title is a string
-            onPress={router.back}
-            color={'#595959'}
-          />
-          </ThemedView>
-          <ThemedView style={styles.ctaWrapper2}>
             <Button
               title={'Confirm'} // Ensure the title is a string
-              onPress={confirmPhoto} // Navigate to the Garden AR screen
+              onPress={() => {
+                confirmPlanting(); // Call the takePhoto function
+              }} // Navigate to the Garden AR screen
               color={'#ef7e47'} // Use the theme color
             />
           </ThemedView>
         </ThemedView>
-      </ThemedView>
-    </ThemedView>
-  );
+      </View>
+    );
 }
 
+let CIRCLE_RADIUS = 30;
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'white',
-  },
-  cameraContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    width: '100%',
-  },
-  buttonCamera: {
-    position: 'absolute',
-    bottom: 20,
-    padding: 10,
-    backgroundColor: 'transparent',
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: '#ffffff',
-  },
-  imageContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    width: '100%',
-    position: 'relative',
-  },
-  image: {
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    position: 'absolute',
-    backgroundColor: 'grey', // transparent
-    objectFit: 'contain',
-    borderRadius: 25,
-    borderWidth: 0,
-  },
-  ctaContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    width: '100%',
-    flexDirection: 'row',
-    columnGap: 10,
-    height: 165,
-    padding: 10,
-    backgroundColor: 'transparent',
-    
-    alignContent: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  ctaWrapper: {
-    flex: 1,
-    padding: 0,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#595959',
-    maxHeight: 88,
-    minHeight: 66,
-    minWidth: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#595959',
-    backgroundColor: '#FFFFFF', // ish white
-    borderStyle: 'solid',
-    tintColor: '#78909c', // dark grey
-  },
-  ctaWrapper2: {
-    flex: 1,
-    padding: 0,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#ef7e47',
-    maxHeight: 88,
-    minHeight: 66,
-    minWidth: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#ef7e47',
-    backgroundColor: '#FFFFFF', // ish white
-    borderStyle: 'solid',
-    tintColor: '#78909c', // dark grey
+  img: {
+    height: 60,
+    width: 60,
+    borderRadius: 30
 
-    // color: '#595959', // dark grey
-    // color: '#ef7e47', // orange
-    // color: '#78909c', // darker grey
-    // color: '#eeeeee', // light grey
-    // color: '#595959', // dark grey
   },
+  mainContainer: {
+    flex: 1
+  },
+  ballContainer: {
+    height:200
+  },
+  circle: {
+    backgroundColor: "skyblue",
+    width: CIRCLE_RADIUS * 2,
+    height: CIRCLE_RADIUS * 2,
+    borderRadius: CIRCLE_RADIUS
+  },
+  row: {
+    flexDirection: "row"
+  },  
+  dropZone: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  dropZone1: {
+    height: 100,
+    width: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "dashed"
+  },
+  dropZone1f: {
+    height: 100,
+    width: 100,
+    backgroundColor: "green",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "solid"
+  },
+  dropZone2f: {
+    height: 100,
+    width: 100,
+    backgroundColor: "green",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "solid"
+  },
+  dropZone3f: {
+    height: 100,
+    width: 100,
+    backgroundColor: "green",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "solid"
+  },
+  dropZone2: {
+    height: 100,
+    width: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "dashed"
+  },
+  dropZone3: {
+    height: 100,
+    width: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "dashed"
+  },
+  text: {
+    marginTop: 25,
+    marginLeft: 5,
+    marginRight: 5,
+    textAlign: "center",
+    color: "#fff",
+    fontSize: 25,
+    fontWeight: "bold"
+  }
 });
