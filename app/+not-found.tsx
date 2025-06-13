@@ -13,6 +13,12 @@ export default function NotFoundScreen() {
         <Link href="/1-Home" style={styles.link}>
           <ThemedText type="link">Go to home screen!</ThemedText>
         </Link>
+        <Link href="/6-Home" style={styles.link}>
+          <ThemedText type="link">Go to 6 home screen!</ThemedText>
+        </Link>
+        <Link href="/3-Design" style={styles.link}>
+          <ThemedText type="link">Go to design screen!</ThemedText>
+        </Link>
       </ThemedView>
     </>
   );

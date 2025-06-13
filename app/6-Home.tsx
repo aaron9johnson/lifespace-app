@@ -1,31 +1,108 @@
+import { useRef } from 'react';
 import { Image } from 'expo-image';
-import { Button, Platform, StyleSheet, Text, TouchableOpacity, ViewComponent } from 'react-native';
+import { View, Dimensions, Button, Platform, StyleSheet, Text, TouchableOpacity, ViewComponent } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+// import { HelloWave } from '@/components/HelloWave';
+// import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
-export default function DesignScreen() {
+// import Carousel from 'react-native-snap-carousel';
+
+
+
+
+// import * as React from "react";
+// import { Dimensions, Text, View } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+import Carousel, {
+  ICarouselInstance,
+  Pagination,
+} from "react-native-reanimated-carousel";
+
+const data = [...new Array(6).keys()];
+const width = Dimensions.get("window").width;
+
+export default function HomeAllScreen() {
   const router = useRouter();
-  const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
+  console.log('HomeAllScreen');
+  const { image, gardens, plants } = useLocalSearchParams<{ image?: any; gardens?: any; plants?: any; }>();
+  console.log('HomeAllScreen2');
+  const carouselRef = useRef(null);
+  const { width } = Dimensions.get('window');
+
+  const data = [
+    { title: 'Item 1', color: 'red' },
+    { title: 'Item 2', color: 'blue' },
+    { title: 'Item 3', color: 'green' },
+  ];
+  function renderItem( item: any) {
+    return (
+      <ThemedView>
+        <ThemedView>
+          { image ? <Image style={styles.block} source={image}></Image> : <ThemedView style={styles.block2}></ThemedView>}
+        </ThemedView>
+        <ThemedText>{item.title}</ThemedText>
+      </ThemedView>
+    );
+  };
+  const ref = useRef<ICarouselInstance>(null);
+  const progress = useSharedValue<number>(0);
+  
+  const onPressPagination = (index: number) => {
+    ref.current?.scrollTo({
+      /**
+       * Calculate the difference between the current index and the target index
+       * to ensure that the carousel scrolls to the nearest index
+       */
+      count: index - progress.value,
+      animated: true,
+    });
+  };
   return (
     <ThemedView style={styles.screen}>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle" style={styles.stepText}>Home</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-              <Image source={image} style={styles.image}></Image>
-      
-            </ThemedView>
+        <ThemedView>
+          <View>
+            <Carousel
+              ref={ref}
+              width={width}
+              height={width / 2}
+              data={data}
+              onProgressChange={progress}
+              renderItem={({ index }) => (
+                <View
+                  style={{
+                    flex: 1,
+                    borderWidth: 1,
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ textAlign: "center", fontSize: 30 }}>{index}</Text>
+                  { image ? <Image style={styles.block} source={image}></Image> : <ThemedView style={styles.block2}></ThemedView>}
+                  { index % 2 == 0 ? <ThemedView style={styles.block}></ThemedView> : <ThemedView style={styles.block2}></ThemedView>}
+                </View>
+              )}
+            />
+            <Pagination.Basic
+              progress={progress}
+              data={data}
+              dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
+              containerStyle={{ gap: 5, marginTop: 10 }}
+              onPress={onPressPagination}
+            />
+          </View>
+        </ThemedView>
       <ThemedView style={styles.ctaWrapper}>
         <TouchableOpacity style={styles.cta} onPress={() => {
           router.dismissAll()
           router.replace('/1-Home')
         }}>
-          <Text style={styles.ctaText}>Home</Text>
+          <Text style={styles.ctaText}>Restart</Text>
         </TouchableOpacity>
       </ThemedView>
     </ThemedView>
@@ -33,6 +110,16 @@ export default function DesignScreen() {
 }
 
 const styles = StyleSheet.create({
+  block: {
+    height: 300,
+    width: 200,
+    backgroundColor: 'red',
+  },
+  block2: {
+    height: 300,
+    width: 200,
+    backgroundColor: 'green',
+  },
   image:{
     height: 300,
     width: 200,
@@ -123,21 +210,12 @@ const styles = StyleSheet.create({
     color: '#595959'
   },
   ctaWrapper: {
-    backgroundColor: '#ef7e47', // orange
-    
-    borderRadius: 8,
-    borderColor: '#ef7e47',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    marginBottom: 28,
     width: '100%',
-    height: 48,
-    lineHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'transparent', // transparent
     
   },
   cta: {
+    marginTop: 16,
     backgroundColor: '#ef7e47', // orange
     
     borderRadius: 8,
@@ -154,18 +232,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     color: '#ffffff', // white
-    backgroundColor: '#ef7e47', // orange
     
-    borderRadius: 8,
-    borderColor: '#ef7e47',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    marginBottom: 28,
-    width: '100%',
-    height: 48,
-    lineHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
     
   },
   // cta: {

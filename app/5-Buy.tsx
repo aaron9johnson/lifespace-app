@@ -7,13 +7,71 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
 import { Link, useRouter, Stack, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+
+class Plant {
+  name: string;
+  image: any;
+  color: string;
+  constructor(name: string, image: any, color: string) {
+    this.name  = name;
+    this.image  = image;
+    this.color  = color;
+  }
+}
 
 export default function DesignScreen() {
   const router = useRouter();
-  const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
+    const nullPlant = new Plant('', '', '#000000');
+  const { image, plant1, plant2, plant3, gardens} = useLocalSearchParams<{ image: any; plant1: any; plant2: any; plant3: any; gardens: any; }>();
+  const plants = (plant1, plant2, plant3)
+  const [plantData, setPlantData] = useState(
+      [
+        new Plant('Cucc', require('@/assets/images/cuc.png'), '#3CB043'),
+        new Plant('Dill', require('@/assets/images/dill.png'), '#5DBB63'),
+        new Plant('Carr', require('@/assets/images/carrot.png'), '#466D1D'),
+        new Plant('Toma', require('@/assets/images/tomato.png'), '#234F1E'),
+        new Plant('Cucc', require('@/assets/images/arug.png'), '#3CB043'),
+        new Plant('Dill', require('@/assets/images/dill.png'), '#5DBB63'),
+        new Plant('Carr', require('@/assets/images/carrot.png'), '#466D1D'),
+        new Plant('Toma', require('@/assets/images/tomato.png'), '#234F1E'),
+      ]
+    )
   return (
     <ThemedView style={styles.screen}>
       <ThemedView style={styles.titleContainer}>
+        <View style={styles.dropZone}>
+          { plantData.filter((i) => { return i.name == plant1; }).map((item, index) => (
+            <>
+              { index == 0 ? <View>
+                <Image
+                  source={item.image}
+                  style={[styles.image,{ width: 100, height: 100 }]}
+                ></Image>
+              </View> : <></>}
+            </>
+          ))}
+          { plantData.filter((i) => { return i.name == plant2; }).map((item, index) => (
+            <>
+              { index == 0 ? <View>
+                <Image
+                  source={item.image}
+                  style={[styles.image,{ width: 100, height: 100 }]}
+                ></Image>
+              </View> : <></>}
+            </>
+          ))}
+          { plantData.filter((i) => { return i.name == plant3; }).map((item, index) => (
+            <>
+              { index == 0 ? <View>
+                <Image
+                  source={item.image}
+                  style={[styles.image,{ width: 100, height: 100 }]}
+                ></Image>
+              </View> : <></>}
+            </>
+          ))}
+        </View>
         <Image source={image} style={styles.image}></Image>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
@@ -192,5 +250,60 @@ const styles = StyleSheet.create({
     maxWidth: 120,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dropZone: {
+    flexDirection: "row",
+    // justifyContent: "space-around",
+    alignItems: "center",
+    marginLeft: 50,
+    marginTop: 50,
+  },
+  dropZone1: {
+    height: 100,
+    width: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "dashed"
+  },
+  dropZone1f: {
+    height: 100,
+    width: 100,
+    backgroundColor: "green",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "solid"
+  },
+  dropZone2f: {
+    height: 100,
+    width: 100,
+    backgroundColor: "green",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "solid"
+  },
+  dropZone3f: {
+    height: 100,
+    width: 100,
+    backgroundColor: "green",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "solid"
+  },
+  dropZone2: {
+    height: 100,
+    width: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "dashed"
+  },
+  dropZone3: {
+    height: 100,
+    width: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderStyle: "dashed"
   },
 });
