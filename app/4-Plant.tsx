@@ -210,6 +210,9 @@ export default function PlantScreen() {
 
     return (
       <View style={styles.mainContainer}>
+        <ThemedView style={styles.instructionContainer}>
+          <ThemedText type="title" style={{ textAlign: 'center', padding: 5}}>Drag plants into your garden</ThemedText>
+        </ThemedView>
         <View style={styles.dropZone}>
           {/* <Text style={styles.text}>Drop them here!</Text> */}
           <View style={[ drops1.color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops1.color  } ]}>
@@ -244,7 +247,10 @@ export default function PlantScreen() {
               Confirm
             </ThemedText>
           </TouchableOpacity>
-          </ThemedView>: <></>
+          </ThemedView>:
+          <ThemedView style={styles.instructionContainer}>
+          <ThemedText type="title" style={{ textAlign: 'center', padding: 15, color: 'black', backgroundColor: 'white'}}>Pick a plant and drag it into the garden</ThemedText>
+        </ThemedView>
           }
       </View>
     );
@@ -319,48 +325,48 @@ const styles = StyleSheet.create({
     height: 100,
     width: 100,
     backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#fff",
+    borderWidth: 3,
+    borderColor: "#000000",
     borderStyle: "dashed"
   },
   dropZone1f: {
     height: 100,
     width: 100,
     backgroundColor: "green",
-    borderWidth: 1,
+    borderWidth: 3,
     borderColor: "#fff",
-    borderStyle: "solid"
+    borderStyle: "dashed"
   },
   dropZone2f: {
     height: 100,
     width: 100,
     backgroundColor: "green",
-    borderWidth: 1,
+    borderWidth: 3,
     borderColor: "#fff",
-    borderStyle: "solid"
+    borderStyle: "dashed"
   },
   dropZone3f: {
     height: 100,
     width: 100,
     backgroundColor: "green",
-    borderWidth: 1,
+    borderWidth: 3,
     borderColor: "#fff",
-    borderStyle: "solid"
+    borderStyle: "dashed"
   },
   dropZone2: {
     height: 100,
     width: 100,
     backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#fff",
+    borderWidth: 3,
+    borderColor: "#000000",
     borderStyle: "dashed"
   },
   dropZone3: {
     height: 100,
     width: 100,
     backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#fff",
+    borderWidth: 3,
+    borderColor: "#000000",
     borderStyle: "dashed"
   },
   text: {

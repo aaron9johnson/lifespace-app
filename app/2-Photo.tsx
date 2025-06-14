@@ -83,14 +83,22 @@ export default function PhotoScreen() {
         <Image source={image} style={styles.image}></Image>
         <ThemedView style={styles.ctaContainer}>
           <ThemedView style={ styles.ctaWrapper }>
-            <Button
+            <TouchableOpacity
+              onPress={() => {
+                setImage(null);
+                setTakingPhoto(true);
+              }}
+            >
+              <ThemedText type="title" style={{ textAlign: 'center', color: 'black' }}>Retake</ThemedText>
+            </TouchableOpacity>
+            {/* <Button
               title={'Retake'} // Ensure the title is a string
               onPress={() => {
                 setImage(null);
                 setTakingPhoto(true);
               }}
               color={'#595959'}
-            />
+            /> */}
           </ThemedView>
           <ThemedView style={styles.ctaWrapper2}>
             <TouchableOpacity
@@ -124,8 +132,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000000', // transparent
+    opacity:0.5,
     left: 20,
     right: 20,
+    borderRadius: 20,
   },
   instructionContainerBottom: {
     // width: '100%',
@@ -135,8 +145,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000000', // transparent
+    opacity:0.5,
     left: 20,
     right: 20,
+    borderRadius: 20,
   },
   container: {
     width: '100%',

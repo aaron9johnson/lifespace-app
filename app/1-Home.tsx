@@ -9,6 +9,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Link, Stack } from 'expo-router';
 
 import { useRouter } from 'expo-router';
+import { ThemeCTA } from './aa/ThemeCTA';
 
 export default function StartScreen() {
   const router = useRouter();
@@ -31,6 +32,8 @@ export default function StartScreen() {
           style={styles.img}
         />
       </ThemedView>
+
+      {/* <ThemeCTA link='/2-Photo'>Get Started</ThemeCTA> */}
 
       <ThemedView style={styles.ctaWrapper}>
         <ThemedCTA lightColor={'#ffffff'} darkColor={'#ffffff'} link='/2-Photo'>Get Started</ThemedCTA>

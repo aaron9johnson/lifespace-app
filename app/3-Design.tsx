@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000', // transparent
     left: 20,
     right: 20,
+    borderRadius: 20,
   },
   instructionContainer2: {
     // width: '100%',
@@ -220,6 +221,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000', // transparent
     left: 20,
     right: 20,
+    opacity:0.5,
+    borderRadius: 20,
   },
   container: {
     flex: 1,

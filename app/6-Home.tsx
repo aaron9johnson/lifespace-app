@@ -8,11 +8,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedCTA } from '@/components/ThemedCTA';
 import { ThemedView } from '@/components/ThemedView';
 import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-
 // import Carousel from 'react-native-snap-carousel';
-
-
-
 
 // import * as React from "react";
 // import { Dimensions, Text, View } from "react-native";
@@ -63,28 +59,39 @@ export default function HomeAllScreen() {
   };
   return (
     <ThemedView style={styles.screen}>
-      <ThemedView style={styles.stepContainer}>
+      {/* <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle" style={styles.stepText}>Home</ThemedText>
-      </ThemedView>
-        <ThemedView>
+      </ThemedView> */}
+        <ThemedView  style={{ backgroundColor: 'white'}}>
           <View>
             <Carousel
               ref={ref}
               width={width}
-              height={width / 2}
+              height={400}
               data={data}
               onProgressChange={progress}
               renderItem={({ index }) => (
                 <View
-                  style={{
-                    flex: 1,
-                    borderWidth: 1,
-                    justifyContent: "center",
-                  }}
+                  style={{ width: '100%', height: '100%'}}
                 >
-                  <Text style={{ textAlign: "center", fontSize: 30 }}>{index}</Text>
-                  { image ? <Image style={styles.block} source={image}></Image> : <ThemedView style={styles.block2}></ThemedView>}
-                  { index % 2 == 0 ? <ThemedView style={styles.block}></ThemedView> : <ThemedView style={styles.block2}></ThemedView>}
+                  <ThemedView style={{
+                    borderWidth: 1,
+                    backgroundColor: 'white',
+                    maxWidth: 200,
+                    borderRadius: 8,
+                    width: 500,
+                    height: 400,
+                    flexDirection: 'column',
+                    alignSelf: 'center'
+                  }}>
+                    <Text style={{ textAlign: "center", fontSize: 30 }}>Garden {index + 1}</Text>
+                    <Image style={index % 2 == 0 ? styles.block : styles.block2} source={image}></Image>
+                    <Text style={{ textAlign: "left", fontSize: 30 }}>Next Task:</Text>
+                    <Text style={{ textAlign: "left", fontSize: 30 }}>Harvest Tomatoes</Text>
+                    {/* <ThemedView style={index % 2 == 0 ? styles.blockV : styles.blockV2}></ThemedView> */}
+                  </ThemedView>
+                  {/* { image ? <Image style={styles.block} source={image}></Image> : <ThemedView style={styles.block2}></ThemedView>}
+                  { index % 2 == 0 ? <ThemedView style={styles.block}></ThemedView> : <ThemedView style={styles.block2}></ThemedView>} */}
                 </View>
               )}
             />
@@ -116,6 +123,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
   },
   block2: {
+    height: 300,
+    width: 200,
+    backgroundColor: 'green',
+  },
+  blockV: {
+    height: 300,
+    width: 200,
+    backgroundColor: 'red',
+  },
+  blockV2: {
     height: 300,
     width: 200,
     backgroundColor: 'green',
