@@ -1,293 +1,229 @@
-import React, { use, useEffect, useRef, useState } from 'react';
-import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps} from 'react-native';
-import { Camera, useCameraPermission, getCameraDevice } from 'react-native-vision-camera';
-import { Image } from 'expo-image';
-
+import React, { useRef } from 'react';
+import { View, StyleSheet, Button } from 'react-native';
 import { GLView } from 'expo-gl';
-import * as THREE from 'three';
+import { Asset } from 'expo-asset';
 import { Renderer } from 'expo-three';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedCTA } from '@/components/ThemedCTA';
-import { ThemedView } from '@/components/ThemedView';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-
-
-export default function DesignScreen() {
-  const router = useRouter();
-  const cameraRef = useRef(null);
-  const glRef = useRef(null);
+import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import {
+  GestureDetector,
+  Gesture,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
+import Animated, { useSharedValue } from 'react-native-reanimated';
+export default function App() {
+  
+  const models = useRef([]);
   const sceneRef = useRef(null);
-  const rendererRef = useRef(null);
-  const threeCameraRef = useRef(null);
-  const plantMeshesRef = useRef([]);
-  // const [photo, setPhoto] = useState(null);
-  const [plants, setPlants] = useState([]);
-  const [gardens, setGardens] = useState([]);
-  const [clicks, setClicks] = useState(0);
-  const { image } = useLocalSearchParams<{ image: any; }>();
+  const modelGroup = useRef(new THREE.Group());
+
+  const scale = useSharedValue(0.1);
+  const scaleOrigin = useSharedValue(0.1);
+  const rotate = useSharedValue({ x: 0, y: 0, z: 0 });
+  const translate = useSharedValue({ x: 0, y: 0 });
+  const translateOrigin = useSharedValue({ x: 0, y: 0 });
+
+  const resetTransform = () => {
+    scale.value = .1;
+    rotate.value = { x: 0, y: 0, z: 0 };
+    translate.value = { x: 0, y: 0 };
+  };
+
+  const pinchGesture = Gesture.Pinch().onStart((e) => {
+    scaleOrigin.value = e.scale
+  }).onUpdate((e) => {
+    console.log("pinch")
+    const scaleTemp = (e.scale - scaleOrigin.value) * .01
+    const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+    scale.value = clamp(scale.value + scaleTemp, .08, 0.55);
+  }).onEnd((e) => {
+    const scaleTemp = (e.scale - scaleOrigin.value) * .01
+      const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+      scale.value = clamp(scale.value + scaleTemp, .08, 0.55);
+    });
+
+  const rotateGesture = Gesture.Rotation().onUpdate((e) => {
+    console.log("rotate")
+    rotate.value = {
+      ...rotate.value,
+      y: -e.rotation,
+    };
+  });
+
+  // const translateUpdate = (e) => {
+  //   translate.value = {
+  //     x: translateOrigin.value.x + e.translationX * 0.005,
+  //     y: translateOrigin.value.y - e.translationY * 0.005,
+  //   };
+  // }
+  // const rollUpdate = (e) => {
+  //   rotate.value = {
+  //     ...rotate.value,
+  //     z: e.translationY,
+  //   };
+  // }
+
+  const panGesture = Gesture.Pan().minDistance(1)
+    .onStart((e) => {
+      if (e.numberOfPointers > 1){
+        // rollUpdate(e)
+        rotate.value = {
+          ...rotate.value,
+          x: rotate.value.x + e.translationY * 0.0005,
+        };
+        console.log("rotate up")
+      } else {
+        translateOrigin.value = {
+          x: translate.value.x + e.translationX * 0.005,
+          y: translate.value.y - e.translationY * 0.005,
+        };
+        // translateUpdate(e)
+        translate.value = {
+          x: translateOrigin.value.x + e.translationX * 0.005,
+          y: translateOrigin.value.y - e.translationY * 0.005,
+        };
+      }
+    }).onUpdate((e) => {
+      if (e.numberOfPointers > 1){
+        // rollUpdate(e)
+        rotate.value = {
+          ...rotate.value,
+          x: rotate.value.x + e.translationY * 0.0005,
+        };
+        console.log("rotate up...")
+      } else {
+        // translateUpdate(e)
+        translate.value = {
+          x: translateOrigin.value.x + e.translationX * 0.005,
+          y: translateOrigin.value.y - e.translationY * 0.005,
+        };
+      }
+    }).onEnd((e) => {
+      if (e.numberOfPointers > 1){
+        // rollUpdate(e)
+        rotate.value = {
+          ...rotate.value,
+          x: rotate.value.x + e.translationY * 0.0005,
+        };
+        console.log("rotate up.")
+      } else {
+        // translateUpdate(e)
+        translate.value = {
+          x: translateOrigin.value.x + e.translationX * 0.005,
+          y: translateOrigin.value.y - e.translationY * 0.005,
+        };
+      }
+    });
+
+  
+
+  const gesture = Gesture.Simultaneous(pinchGesture, rotateGesture, panGesture);
+
+  const loadModel = async () => {
+    const objAsset = Asset.fromModule(require('@/assets/models/low.obj'));
+    const mtlAsset = Asset.fromModule(require('@/assets/models/low.mtl'));
+    await Promise.all([objAsset.downloadAsync(), mtlAsset.downloadAsync()]);
+
+    const mtlLoader = new MTLLoader();
+    const mtlText = await fetch(mtlAsset.uri).then((res) => res.text());
+    const materials = mtlLoader.parse(mtlText);
+    materials.preload();
+
+    const objLoader = new OBJLoader();
+    objLoader.setMaterials(materials);
+    const objText = await fetch(objAsset.uri).then((res) => res.text());
+    const object = objLoader.parse(objText);
+
+    object.scale.set(scale.value, scale.value, scale.value);
 
 
-  const { hasPermission, requestPermission } = useCameraPermission()
-  const devices = Camera.getAvailableCameraDevices();
-  const device = getCameraDevice(devices, 'back', {
-      physicalDevices: ['wide-angle-camera']
-    })
-    if (!hasPermission) {
-      requestPermission();
-      return (<View style={styles.container} onPress={requestPermission}>
-        <Text style={styles.text}>!!hasPermission</Text>
-      </View>);
-    }
+    const box = new THREE.Box3().setFromObject(object);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    object.position.sub(center); // move geometry to center
+
+    modelGroup.current.add(object);
+    models.current.push(object);
+  };
 
   const onContextCreate = async (gl) => {
-
-    glRef.current = gl;
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
+    const scene = new THREE.Scene();
+    // const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    // camera.position.z = 3;
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 100);
+    camera.position.z = 5;
+
+    sceneRef.current = scene;
 
     const renderer = new Renderer({ gl });
     renderer.setSize(width, height);
-    rendererRef.current = renderer;
 
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
+    scene.add(new THREE.DirectionalLight(0xffffff, 0.5));
+    scene.add(modelGroup.current);
 
-    const camera = new THREE.PerspectiveCamera(70, width / height, 0.01, 1000);
-    camera.position.z = 5;
-    threeCameraRef.current = camera;
+    await loadModel(); // Load initial model
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambientLight);
+    const render = () => {
+      requestAnimationFrame(render);
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      plantMeshesRef.current.forEach((plant) => {
-        if (plant.rotation.y < 2.45) {
-          plant.rotation.y += 0.01;
-        }
-      });
-      renderer.render(sceneRef.current, threeCameraRef.current);
-      glRef.current.endFrameEXP();
+      const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+      const s = clamp(scale.value, 0.08, 0.55);
+      const tx = clamp(translate.value.x, -10, 10);
+      const ty = clamp(translate.value.y, -10, 10);
+      const ry = isNaN(rotate.value.y) ? 0 : rotate.value.y;
+      const rz = isNaN(rotate.value.z) ? 0 : rotate.value.z;
+      const rx = isNaN(rotate.value.x) ? 0 : rotate.value.x;
+
+      modelGroup.current.scale.set(s, s, s);
+      modelGroup.current.rotation.set(rx, ry, rz); // or include X/Z
+      modelGroup.current.position.set(tx, ty, 0);
+      // modelGroup.current.scale.set(scale.value, scale.value, scale.value);
+      // modelGroup.current.rotation.set(rotate.value.x, rotate.value.y, rotate.value.z);
+      // modelGroup.current.position.set(translate.value.x, translate.value.y, 0);
+
+      renderer.render(scene, camera);
+      gl.endFrameEXP();
     };
-    animate();
+
+    render();
   };
 
-const addPlant = () => {
-  if (!sceneRef.current || !threeCameraRef.current) return;
-  setClicks(clicks + 1)
-  // clicks++;
-
-  const group = new THREE.Group();
-
-  if (clicks === 1) {
-    // Create a planter box (4 sides)
-    const colors = [0x654321, 0x654321, 0x964B00, 0x964B00]; // dark browns
-    const spacing = 0.46;
-
-    colors.forEach((color, index) => {
-      let geometry;
-      let position = new THREE.Vector3();
-
-      switch (index) {
-        case 0: geometry = new THREE.BoxGeometry(0.02, 0.25, 0.5); position.set(-spacing / 4, 0, 0); break;
-        case 1: geometry = new THREE.BoxGeometry(0.02, 0.25, 0.5); position.set(spacing / 4, 0, 0); break;
-        case 2: geometry = new THREE.BoxGeometry(0.25, 0.25, 0.02); position.set(0, 0, -spacing / 2); break;
-        case 3: geometry = new THREE.BoxGeometry(0.25, 0.25, 0.02); position.set(0, 0, spacing / 2); break;
-      }
-
-      const material = new THREE.MeshStandardMaterial({ color });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.copy(position);
-      group.add(mesh);
-    });
-
-  } else if (clicks === 2) {
-    // Center plant
-    const geometry = new THREE.ConeGeometry(0.07, 0.2, 4);
-    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-    const cone = new THREE.Mesh(geometry, material);
-    cone.position.y = 0.15;
-    group.add(cone);
-
-  } else if (clicks === 3) {
-    // Left side leaf
-    const geometry = new THREE.ConeGeometry(0.07, 0.2, 4);
-    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-    const cone = new THREE.Mesh(geometry, material);
-    cone.position.y = 0.15;
-    cone.position.z = 0.15;
-    group.add(cone);
-
-  } else if (clicks === 4) {
-    // Right side leaf
-    const geometry = new THREE.ConeGeometry(0.07, 0.2, 4);
-    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-    const cone = new THREE.Mesh(geometry, material);
-    cone.position.y = 0.15;
-    cone.position.z = -0.15;
-    group.add(cone);
-  }
-
-  // Slight downward tilt
-  group.rotation.x = 0.2;
-  group.rotation.y = 2;
-
-  // Start slightly further back and to the left
-  const camera = threeCameraRef.current;
-  const position = new THREE.Vector3(-0.3, 0, -2.2);
-  position.applyMatrix4(camera.matrixWorld);
-  group.position.copy(position);
-
-  sceneRef.current.add(group);
-  plantMeshesRef.current.push(group);
-};
-  const confirmDesign = async () => {
-    router.push({ 
-      pathname: '/4-Plant',
-      params: {
-        image: image,
-        gardens: gardens,
-        plants: plants,
-      }
-    });
-  };
   return (
-    <View style={styles.container}>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={false}
-      />
-      <Image source={image} style={styles.image}></Image>
-      <TouchableWithoutFeedback onPress={addPlant}>
-        <GLView
-          style={StyleSheet.absoluteFill}
-          onContextCreate={onContextCreate}
-        />
-      </TouchableWithoutFeedback>
-
-      { clicks > 1 ?
-        <ThemedView style={styles.ctaContainer}>
-          <ThemedView style={styles.ctaWrapper}>
-          <Button
-            title={'Cancel'} // Ensure the title is a string
-            onPress={() => {
-              console.log("cancel")
-            }}
-            color={'#595959'}
-          />
-          </ThemedView>
-          <ThemedView style={styles.ctaWrapper2}>
-            <Button
-              title={'Confirm'} // Ensure the title is a string
-              onPress={confirmDesign} // Navigate to the Garden AR screen
-              color={'#ef7e47'} // Use the theme color
-            />
-          </ThemedView>
-        </ThemedView>
-        :
-        <ThemedView style={styles.instructionContainer2}>
-          <ThemedText type="title" style={{ textAlign: 'center' }}>Place a garden</ThemedText>
-        </ThemedView>
-      }
-
-      <ThemedView style={styles.instructionContainer}>
-        <ThemedText type="title" style={{ textAlign: 'center' }}>Design your Garden</ThemedText>
-      </ThemedView>
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureDetector gesture={gesture}>
+        <View style={styles.container}>
+          <GLView style={styles.glview} onContextCreate={onContextCreate} />
+          <View style={styles.buttons}>
+            <Button title="Reset" onPress={resetTransform} />
+            <Button title="Add Model" onPress={loadModel} />
+          </View>
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  instructionContainer: {
-    // width: '100%',
-    height: 100,
-    position: 'absolute',
-    top: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000000', // transparent
-    left: 20,
-    right: 20,
-    borderRadius: 20,
-  },
-  instructionContainer2: {
-    // width: '100%',
-    height: 100,
-    position: 'absolute',
-    bottom: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000000', // transparent
-    left: 20,
-    right: 20,
-    opacity:0.5,
-    borderRadius: 20,
-  },
   container: {
-    flex: 1,
-    position: 'relative',
-  },
-  image: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+    flex:1,
     width: '100%',
     height: '100%',
-    backgroundColor: 'white',
+    backgroundColor: 'transparent'
   },
-  ctaContainer: {
+  glview: {
+    flex:1,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent'
+  },
+  buttons: {
     position: 'absolute',
     bottom: 20,
-    left: 0,
     width: '100%',
     flexDirection: 'row',
-    columnGap: 10,
-    height: 165,
-    padding: 10,
-    backgroundColor: 'transparent',
-    
-    alignContent: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  ctaWrapper: {
-    flex: 1,
-    padding: 0,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#595959',
-    maxHeight: 88,
-    minHeight: 66,
-    minWidth: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#595959',
-    backgroundColor: '#FFFFFF', // ish white
-    borderStyle: 'solid',
-    tintColor: '#78909c', // dark grey
-  },
-  ctaWrapper2: {
-    flex: 1,
-    padding: 0,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#ef7e47',
-    maxHeight: 88,
-    minHeight: 66,
-    minWidth: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#ef7e47',
-    backgroundColor: '#FFFFFF', // ish white
-    borderStyle: 'solid',
-    tintColor: '#78909c', // dark grey
-
-    // color: '#595959', // dark grey
-    // color: '#ef7e47', // orange
-    // color: '#78909c', // darker grey
-    // color: '#eeeeee', // light grey
-    // color: '#595959', // dark grey
+    justifyContent: 'space-around',
   },
 });

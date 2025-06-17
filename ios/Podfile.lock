@@ -42,7 +42,7 @@ PODS:
     - ExpoModulesCore
   - ExpoFont (13.3.1):
     - ExpoModulesCore
-  - ExpoGL (15.1.5):
+  - ExpoGL (15.1.6):
     - ExpoModulesCore
     - ReactCommon/turbomodule/core
   - ExpoHaptics (14.1.4):
@@ -2445,7 +2445,7 @@ SPEC CHECKSUMS:
   ExpoCamera: e88fc30631e63e5504ce19d52c563a6ec49e17d2
   ExpoFileSystem: 3a98ca2a6f13674ecfd97327d1b44a8ace444cbd
   ExpoFont: 312c73403bbd4f98e1d6a5330641a56292583cd2
-  ExpoGL: 8f7f43291e400621ef9aeb7af347816c2051ddc7
+  ExpoGL: 7feb84bfc9b11fd5eccfddfa40cd2cc333efa956
   ExpoHaptics: 68c215e070f660e0a29c45dcda4f60eeff08aefb
   ExpoHead: 5df88545652c2d3a3ea50bcd7f6be6ca935ac997
   ExpoImage: ef8b25fddd3613a0bbdb2936d0583bc6588197dd
@@ -2544,6 +2544,6 @@ SPEC CHECKSUMS:
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: 459d7460e9d45bca54c532f2b3d02eeaeff658e3
+PODFILE CHECKSUM: 4b78714f1c0b136f71600dc5471694dbd6e03a67
 
 COCOAPODS: 1.16.2

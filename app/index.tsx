@@ -10,14 +10,14 @@ export default function Index() {
     (async () => {
       router.dismissAll()
       // router.replace('/1-Home')
-      router.replace({ 
-            pathname: '/6-Home',
-            params: {
-              image: null,
-              gardens: null,
-              plants: null,
-            }
-          });
+      // router.replace({ 
+      //       pathname: '/6-Home',
+      //       params: {
+      //         image: null,
+      //         gardens: null,
+      //         plants: null,
+      //       }
+      //     });
     })();
   }, []);
   

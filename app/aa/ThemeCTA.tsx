@@ -19,10 +19,11 @@ export function ThemeCTA({
   ...rest
 }: ThemeCTAProps) {
   const router = useRouter();
+  const route = () => router.push(link)
   if (link) {
     return (
       <TouchableOpacity
-        onPress={router.push(link)}
+        onPress={route}
         style={styles.cta}
       >
         <ThemeText>
