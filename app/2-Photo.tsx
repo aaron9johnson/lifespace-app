@@ -2,15 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps, TouchableOpacity} from 'react-native';
 import { Camera, useCameraPermission, getCameraDevice } from 'react-native-vision-camera';
 import { Image } from 'expo-image';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedCTA } from '@/components/ThemedCTA';
-import { ThemedView } from '@/components/ThemedView';
 import { useRouter } from 'expo-router';
+import { ThemeView } from './aa/ThemeView';
+import { ThemeText } from './aa/ThemeText';
+import { ThemeCTA } from './aa/ThemeCTA';
 
 export default function PhotoScreen() {
 
+  const errorScreen = () => {
+    return (
+      <ThemeView style={styles.container}>
+        <ThemeView style={styles.errorContainer}>
+          <ThemeText style={styles.errorText}>LifeSpace Requires Camera Permission</ThemeText>
+          <ThemeText style={styles.errorTextSmall}>Allow LifeSpace To Access Camera In Settings</ThemeText>
+        </ThemeView>
+        <ThemeCTA type='borderless' backlink='/1-Home'>Back</ThemeCTA>
+      </ThemeView>
+    );
+  }
+
   if (!Camera.getAvailableCameraDevices) {
-    return (<ThemedView style={styles.container}><ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'} link='/1-Home'>No Camera Permission</ThemedCTA></ThemedView>);
+    return errorScreen();
   }
   const router = useRouter();
   const cameraRef = useRef(null);
@@ -24,14 +36,15 @@ export default function PhotoScreen() {
 
   if (!hasPermission) {
     requestPermission();
-    return (<ThemedView style={styles.container}><ThemedCTA lightColor={'#ef7e47'} darkColor={'#595959'} link='/1-Home'>No Camera Permission</ThemedCTA></ThemedView>);
+    return errorScreen();
   }
   
   const takePhoto = async () => {
     try {
       const photo = await cameraRef.current.takePhoto({
-        flash: 'on',
-        enableAutoRedEyeReduction: true
+        flash: 'off',
+        enableAutoRedEyeReduction: false,
+        enableShutterSound: false
       });
       setImage(photo.path);
     } catch (err) {
@@ -51,7 +64,7 @@ export default function PhotoScreen() {
   
   const renderCamera = () => {
     return (
-      <ThemedView style={styles.cameraContainer}>
+      <ThemeView style={styles.cameraContainer}>
         
         <Camera
           ref={cameraRef}
@@ -60,7 +73,7 @@ export default function PhotoScreen() {
           isActive={true}
           photo={true}
         />
-        <ThemedView style={ takingPhoto ? styles.buttonCamera : styles.buttonCameraPhoto}>
+        <ThemeView style={ takingPhoto ? styles.buttonCamera : styles.buttonCameraPhoto}>
           <Button
             title={' '} // Ensure the title is a string
             onPress={() => {
@@ -70,50 +83,38 @@ export default function PhotoScreen() {
             }} // Navigate to the Garden AR screen
             color={'#000000'} // Use the theme color
           />
-        </ThemedView>
-        <ThemedView style={styles.instructionContainer}>
-          <ThemedText type="title" style={{ textAlign: 'center' }}>Where would you like to plan your garden?</ThemedText>
-        </ThemedView>
-      </ThemedView>
+        </ThemeView>
+        <ThemeView style={styles.instructionContainer}>
+          <ThemeText style={styles.instructionText}>Take a photo of the spot you want to transform into a garden</ThemeText>
+        </ThemeView>
+      </ThemeView>
     );
   }
   const renderImage = () => {
     return (
-      <ThemedView style={styles.imageContainer}>
+      <ThemeView style={styles.imageContainer}>
         <Image source={image} style={styles.image}></Image>
-        <ThemedView style={styles.ctaContainer}>
-          <ThemedView style={ styles.ctaWrapper }>
-            <TouchableOpacity
-              onPress={() => {
+        <ThemeView style={styles.ctaContainer}>
+          <ThemeView style={ styles.ctaWrapper }>
+            <ThemeCTA type='secondary' onPress={() => {
                 setImage(null);
                 setTakingPhoto(true);
-              }}
-            >
-              <ThemedText type="title" style={{ textAlign: 'center', color: 'black' }}>Retake</ThemedText>
-            </TouchableOpacity>
-            {/* <Button
-              title={'Retake'} // Ensure the title is a string
-              onPress={() => {
-                setImage(null);
-                setTakingPhoto(true);
-              }}
-              color={'#595959'}
-            /> */}
-          </ThemedView>
-          <ThemedView style={styles.ctaWrapper2}>
-            <TouchableOpacity
-              onPress={() => {
+              }}>
+              Retake
+            </ThemeCTA>
+          </ThemeView>
+          <ThemeView style={styles.ctaWrapper2}>
+            <ThemeCTA type='primary' onPress={() => {
                 confirmPhoto(); // Call the takePhoto function
-              }} // Navigate to the Garden AR screen
-            >
-              <ThemedText type="title" style={{ textAlign: 'center', color: '#ef7e47' }}>Confirm</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-        </ThemedView>
-        <ThemedView style={styles.instructionContainerBottom}>
-          <ThemedText type="title" style={{ textAlign: 'center' }}>Use this Photo?</ThemedText>
-        </ThemedView>
-      </ThemedView>
+              }}>
+              Confirm
+            </ThemeCTA>
+          </ThemeView>
+        </ThemeView>
+        <ThemeView style={styles.instructionContainerBottom}>
+          <ThemeText style={styles.instructionText}>Use this Photo?</ThemeText>
+        </ThemeView>
+      </ThemeView>
     );
   }
   return (
@@ -124,6 +125,36 @@ export default function PhotoScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+    width: '100%',
+    padding: 20
+
+  },
+  errorText: {
+    fontFamily: 'LatoItalic',
+    fontSize: 32,
+    textAlign: 'center',
+    lineHeight: 32,
+    marginBottom: 24,
+  },
+  errorTextSmall: {
+    fontFamily: 'LatoThinItalic',
+    fontSize: 24,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  instructionText:{
+    fontFamily: 'LatoItalic',
+    fontSize: 32,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -1, height: 1},
+    textShadowRadius: 10,
+    lineHeight: 32,
+  },
   instructionContainer: {
     // width: '100%',
     height: 100,
@@ -131,8 +162,9 @@ const styles = StyleSheet.create({
     top: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000', // transparent
-    opacity:0.5,
+    // backgroundColor: '#000000', // transparent
+    // opacity:0.5,
+    backgroundColor: 'transparent',
     left: 20,
     right: 20,
     borderRadius: 20,
@@ -141,14 +173,15 @@ const styles = StyleSheet.create({
     // width: '100%',
     height: 100,
     position: 'absolute',
-    bottom: 150,
+    bottom: 175,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000', // transparent
-    opacity:0.5,
+    // backgroundColor: '#000000', // transparent
+    // opacity:0.5,
     left: 20,
     right: 20,
     borderRadius: 20,
+    backgroundColor: 'transparent',
   },
   container: {
     width: '100%',
@@ -178,11 +211,10 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'transparent',
     borderRadius: 37,
-    borderWidth: 6,
     borderColor: '#ffffff',
     width: 75,
     height: 75,
-    opacity: 0.5,
+    borderWidth: 0,
   },
   imageContainer: {
     justifyContent: 'center',
@@ -199,16 +231,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: 'grey', // transparent
     objectFit: 'contain',
-    borderRadius: 25,
+    // borderRadius: 25,
     borderWidth: 0,
   },
   ctaContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 40,
     left: 0,
     width: '100%',
-    flexDirection: 'row',
-    columnGap: 10,
+    flexDirection: 'column-reverse',
+    rowGap: 10,
     height: 165,
     padding: 10,
     backgroundColor: 'transparent',
@@ -218,41 +250,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ctaWrapper: {
-    flex: 1,
-    padding: 0,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#595959',
-    maxHeight: 88,
-    minHeight: 66,
-    minWidth: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#595959',
-    backgroundColor: '#FFFFFF', // ish white
-    borderStyle: 'solid',
-    tintColor: '#78909c', // dark grey
+    backgroundColor: 'transparent'
+    
   },
   ctaWrapper2: {
-    flex: 1,
-    padding: 0,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#ef7e47',
-    maxHeight: 88,
-    minHeight: 66,
-    minWidth: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: '#ef7e47',
-    backgroundColor: '#FFFFFF', // ish white
-    borderStyle: 'solid',
-    tintColor: '#78909c', // dark grey
-
-    // color: '#595959', // dark grey
-    // color: '#ef7e47', // orange
-    // color: '#78909c', // darker grey
-    // color: '#eeeeee', // light grey
-    // color: '#595959', // dark grey
+    backgroundColor: 'transparent'
   },
 });

@@ -8,41 +8,32 @@ export default function Index() {
 
   React.useEffect(() => {
     (async () => {
-      router.dismissAll()
-      // router.replace('/1-Home')
-      // router.replace({ 
-      //       pathname: '/6-Home',
-      //       params: {
-      //         image: null,
-      //         gardens: null,
-      //         plants: null,
-      //       }
-      //     });
+      router.replace('/1-Home');
     })();
   }, []);
   
   return (
     <ThemedView style={styles.container}>
       <TouchableOpacity style={styles.cta} onPress={() => {
-          router.dismissAll()
+          // router.dismissAll()
           router.replace('/1-Home')
         }}>
         <Text style={styles.ctaText}>Home</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.cta} onPress={() => {
-          router.dismissAll()
+          // router.dismissAll()
           router.replace('/4-Plant')
         }}>
         <Text style={styles.ctaText}>Plant</Text>
       </TouchableOpacity>
         <TouchableOpacity style={styles.cta} onPress={() => {
-          router.dismissAll()
+          // router.dismissAll()
           router.replace('/6-Home');
         }}>
         <Text style={styles.ctaText}>Home6</Text>
       </TouchableOpacity>
         <TouchableOpacity style={styles.cta} onPress={() => {
-          router.dismissAll()
+          // router.dismissAll()
           router.replace('/3-Design')
         }}>
         <Text style={styles.ctaText}>Design</Text>
