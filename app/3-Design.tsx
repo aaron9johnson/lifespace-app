@@ -6,6 +6,7 @@ import { Renderer } from 'expo-three';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {
   GestureDetector,
   Gesture,
@@ -183,34 +184,65 @@ function updateTranslate(e) {
       setActiveGarden(activeGarden % 3 + 1)
       return;
     }
-    const objAsset = Asset.fromModule(require('@/assets/models/low.obj'));
-    const mtlAsset = Asset.fromModule(require('@/assets/models/low.mtl'));
+    
+    const objAsset = Asset.fromModule(require('@/assets/models/low_rider_raw_1_.obj'));
+    const mtlAsset = Asset.fromModule(require('@/assets/models/low_rider_raw_1_.mtl'));
     await Promise.all([objAsset.downloadAsync(), mtlAsset.downloadAsync()]);
 
     const mtlLoader = new MTLLoader();
+    mtlLoader.setPath('@/assets/models/');
+    // mtlLoader.setResourcePath('@/assets/models/');
     const mtlText = await fetch(mtlAsset.uri).then((res) => res.text());
     const materials = mtlLoader.parse(mtlText);
     materials.preload();
 
     const objLoader = new OBJLoader();
+
     objLoader.setMaterials(materials);
+    objLoader.setPath('@/assets/models/')
     const objText = await fetch(objAsset.uri).then((res) => res.text());
     const object = objLoader.parse(objText);
+
+    // object.traverse((child) => {
+    //   if (child.isMesh) {
+    //     if (Array.isArray(child.material)) {
+    //       console.log(child.material)
+    //       child.material[0].map = textures[0];
+    //       child.material[1].map = textures[1];
+    //       console.log(child.material)
+    //     } else {
+    //       child.material.map = textures[0];
+    //       child.material.emissiveMap = textures[1];
+    //     }
+    //     child.material.needsUpdate = true;
+    //   }
+    // });
+
+    // const myGLTFLoader = new GLTFLoader();
+    // myGLTFLoader.load( '@/assets/models/low_rider_raw_1_/low_rider_raw_1_.gltf', gltf => {
+    //   modelGroup1.current.add( gltf.scene );
+    // } );
 
     switch (activeGarden) {
     case 0:
       setActiveGarden(1)
       object.scale.set(scale1.value, scale1.value, scale1.value);
+      const ambientLight1 = new THREE.AmbientLight(0xffffff, 0.5); // white light, intensity 0.5
+      modelGroup1.current.add(ambientLight1);
       modelGroup1.current.add(object);
       break;
     case 1:
       setActiveGarden(2)
       object.scale.set(scale2.value, scale2.value, scale2.value);
+      const ambientLight2 = new THREE.AmbientLight(0xffffff, 0.5); // white light, intensity 0.5
+      modelGroup2.current.add(ambientLight2);
       modelGroup2.current.add(object);
       break;
     case 2:
       setActiveGarden(3)
       object.scale.set(scale3.value, scale3.value, scale3.value);
+      const ambientLight3 = new THREE.AmbientLight(0xffffff, 0.5); // white light, intensity 0.5
+      modelGroup3.current.add(ambientLight3);
       modelGroup3.current.add(object);
       break;
     case 3:
@@ -272,15 +304,83 @@ function updateTranslate(e) {
     const renderer = new Renderer({ gl });
     renderer.setSize(width, height);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1));
-    scene.add(new THREE.DirectionalLight(0xffffff, 0.5));
+    const hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+    hemiLight.color.setHSL( 0.6, 0.75, 0.5 );
+    hemiLight.groundColor.setHSL( 0.095, 0.5, 0.5 );
+    hemiLight.position.set( 0, 500, 0 );
+    scene.add( hemiLight );
+
+    const dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+    dirLight.position.set( -1, 0.75, 1 );
+    dirLight.position.multiplyScalar( 50);
+    dirLight.name = "dirlight";
+    // dirLight.shadowCameraVisible = true;
+
+    scene.add( dirLight );
+
+    dirLight.castShadow = true;
+    // dirLight.shadow.mapSize = 
+    dirLight.shadow.mapSize.width = dirLight.shadow.mapSize.height = 1024*2;
+
+    const d = 300;
+
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+
+    dirLight.shadow.camera.far = 3500;
+    dirLight.shadow.bias = -0.0001;
+    dirLight.shadow.intensity = 0.35;
+
+
+    // renderer.toneMapping = THREE.LinearToneMapping
+
+    // renderer.toneMapping = THREE.ACESFilmicToneMapping
+//  renderer.toneMappingExposure = 1
+//  scene.environment = null
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    // scene.add(new THREE.DirectionalLight(0xffffff, 0.5));
+
+
+//     const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+// scene.add(ambientLight);
+
+// // Add a directional light
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+// directionalLight.position.set(1, 1, 1).normalize();
+// scene.add(directionalLight);
+
+// const spotlight = new THREE.SpotLight()
+// scene.add(spotlight);
+    // scene.add(new THREE.DirectionalLight());
+    // scene.add(new THREE.HemisphereLight());
+    // scene.add(new THREE.AmbientLight());
+    // scene.add(new THREE.SpotLight());
+    // scene.add(new THREE.PointLight());
+
+    // scene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 0.50));
+    // scene.add(new THREE.DirectionalLight(0xffffff, 0.50));
+
+    // scene.add(new THREE.HemisphereLight());
+    // scene.add(new THREE.DirectionalLight());
+
+    // scene.add(new THREE.AmbientLight(0xffffff, 1));
+    // scene.add(new THREE.DirectionalLight(0xffffff, 0.5));
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // white light, intensity 0.5
+    scene.add(ambientLight);
     scene.add(modelGroup1.current);
     scene.add(modelGroup2.current);
     scene.add(modelGroup3.current);
 
+    modelGroup1.current.add(new THREE.AmbientLight())
+
     await loadModel(); // Load initial model
 
     const render = () => {
+      
       requestAnimationFrame(render);
 
       checkObjects()
@@ -303,6 +403,8 @@ function updateTranslate(e) {
       // modelGroup.current.rotation.set(rotate.value.x, rotate.value.y, rotate.value.z);
       // modelGroup.current.position.set(translate.value.x, translate.value.y, 0);
 
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
       renderer.render(scene, camera);
       gl.endFrameEXP();
     };
