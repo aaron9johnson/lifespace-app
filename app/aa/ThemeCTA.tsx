@@ -10,6 +10,7 @@ export type ThemeCTAProps = TextProps & {
   link?: any;
   replacelink?: any;
   backlink?: any;
+  textstyle?: any;
   type?: 'secondary' | 'primary' | 'borderless';
 };
 
@@ -19,6 +20,7 @@ export function ThemeCTA({
   link,
   replacelink,
   backlink,
+  textstyle,
   type = 'primary',
   ...rest
 }: ThemeCTAProps) {
@@ -36,9 +38,9 @@ export function ThemeCTA({
   return (
       <TouchableOpacity
         onPress={go}
-        style={[styles.cta, styles[type]]}
+        style={[styles.cta, styles[type], rest.style]}
       >
-        <ThemeText style={[styles.ctaTitle, styles['title' + type]]}>
+        <ThemeText style={[styles.ctaTitle, styles['title' + type], textstyle]}>
           {title}{rest.children}
         </ThemeText>
       </TouchableOpacity>

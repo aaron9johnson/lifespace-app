@@ -38,7 +38,10 @@ export default function HomeAllScreen() {
     return (
       <ThemedView>
         <ThemedView>
-          { image ? <Image style={styles.block} source={image}></Image> : <ThemedView style={styles.block2}></ThemedView>}
+          { image ?
+            <Image style={styles.block} source={image}></Image>
+          : <ThemedView style={styles.block2}></ThemedView>}
+          {gardens ? <Image style={[styles.block, {marginTop: -300}]} source={gardens}></Image> : <></>}
         </ThemedView>
         <ThemedText>{item.title}</ThemedText>
       </ThemedView>
@@ -106,7 +109,7 @@ export default function HomeAllScreen() {
         </ThemedView>
       <ThemedView style={styles.ctaWrapper}>
         <TouchableOpacity style={styles.cta} onPress={() => {
-          router.dismissAll()
+          // router.dismissAll()
           router.replace('/1-Home')
         }}>
           <Text style={styles.ctaText}>Restart</Text>

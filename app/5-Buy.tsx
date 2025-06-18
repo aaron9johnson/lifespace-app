@@ -73,6 +73,7 @@ export default function DesignScreen() {
           ))}
         </View>
         <Image source={image} style={styles.image}></Image>
+        <Image source={gardens} style={[styles.image, {backgroundColor: 'transparent', marginTop: -300 }]}></Image>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <Text style={{ fontSize: 48 }}>LowRider Self-Watering Planter</Text>

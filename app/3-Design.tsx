@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button, FlatList, ScrollView } from 'react-native';
 import { GLView } from 'expo-gl';
 import { Asset } from 'expo-asset';
 import { Renderer } from 'expo-three';
@@ -12,12 +12,17 @@ import {
   Gesture,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
-import Animated, { useSharedValue } from 'react-native-reanimated';
-import { useLocalSearchParams } from 'expo-router';
+import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { runOnJS } from 'react-native-reanimated';
+import { ThemeView } from './aa/ThemeView';
+import { ThemeText } from './aa/ThemeText';
+import { ThemeCTA } from './aa/ThemeCTA';
 
 export default function App() {
+  const glViewRef = useRef(null);
+  const [capturedImageUri, setCapturedImageUri] = useState(null);
+  const router = useRouter();
   const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
   const [isRotating, setIsRotating] = useState(true)
   const sceneRef = useRef(null);
@@ -41,7 +46,76 @@ export default function App() {
   const rotate3 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate3 = useSharedValue({ x: 0, y: 0 });
 
+
+  const [selectedModel, setSelectedModel] = useState('LowRider')
+  const [selectedColor, setSelectedColor] = useState('Raw Cedar')
   const [activeGarden, setActiveGarden] = useState(0)
+  const [colorPickerOpen, setColorPickerOpen] = useState(true)
+  const [colorPickerOptions, setColorPickerOptions] = useState([
+    {
+      name: 'Raw Cedar',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/RAW_CEDAR.png')
+    },
+    {
+      name: 'Silver Patina',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/SILVER_PATINA.png')
+    },
+    {
+      name: 'Raven',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/RAVEN_FINISH.png')
+    },
+    {
+      name: 'Coastal',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/COASTAL_FINISH.png')
+    },
+    {
+      name: 'Modern Patina',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/MODERN_PATINA.png')
+    },
+    {
+      name: 'Modern Clear',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/MODERN_CLEAR.png')
+    }
+  ])
+  const [modelOptions, setModelOptions] = useState([
+    {
+      name: 'LowRider',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/low-rider.png')
+    },
+    {
+      name: 'HighRise',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/highrise.png')
+    },
+    {
+      name: 'Canopy',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/canopy.png')
+    },
+    {
+      name: 'Artifex',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/Artifex.png')
+    },
+    {
+      name: 'Garden Box',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/garden_box.png')
+    },
+    {
+      name: 'Elevated Artifex',
+      file: 'low_rider_raw_1_',
+      image: require('@/assets/images/elevated-artifex.png')
+    }
+    
+  ])
 
   const resetTransform = () => {
     switch (activeGarden) {
@@ -81,9 +155,11 @@ export default function App() {
 
   const pinchGesture = Gesture.Pinch().onStart((e) => {
     scaleOrigin.value = e.scale
+    runOnJS(setColorPickerOpen)(false)
   }).onUpdate(updateScale).onEnd(updateScale);
 
   const rotateGesture = Gesture.Rotation().onUpdate((e) => {
+    runOnJS(setColorPickerOpen)(false)
     console.log("rotate")
     switch (activeGarden) {
       case 1:
@@ -152,6 +228,7 @@ function updateTranslate(e) {
 }
   const panGesture = Gesture.Pan().minDistance(1)
     .onStart((e) => {
+      runOnJS(setColorPickerOpen)(false)
       switch (activeGarden) {
         case 1:
           translateOrigin.value = {
@@ -180,6 +257,7 @@ function updateTranslate(e) {
   const gesture = Gesture.Simultaneous(pinchGesture, rotateGesture, panGesture);
 
   const loadModel = async () => {
+    setColorPickerOpen(true)
     if (models.current.length >= 3) {
       setActiveGarden(activeGarden % 3 + 1)
       return;
@@ -420,24 +498,267 @@ function updateTranslate(e) {
     setIsRotating(false)
   }
 
+  const confirmDesign = async () => {
+    const snap = await handleSnapshot()
+    console.log('confirmDesign: ', image);
+    router.push({ 
+      pathname: '/4-Plant',
+      params: {
+        image: image,
+        gardens: snap
+      }
+    });
+  };
+
+  const handleSnapshot = async () => {
+    let u = ''
+    if (glViewRef.current) {
+      try {
+        const snapshot = await glViewRef.current.takeSnapshotAsync({
+          format: 'png',
+        });
+        setCapturedImageUri(snapshot.uri);
+        console.log('Snapshot taken:', snapshot.uri);
+        u = snapshot.uri
+      } catch (error) {
+        console.error('Error taking snapshot:', error);
+      }
+    }
+    return u
+  };
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, position: 'relative'}}>
       <Image source={image} style={styles.image}></Image>
       <GestureDetector gesture={gesture}>
         <View style={styles.container}>
-          <GLView style={styles.glview} onContextCreate={onContextCreate} />
-          <View style={styles.buttons}>
+          <GLView ref={glViewRef} style={styles.glview} onContextCreate={onContextCreate} />
+          {/* <View style={styles.buttons}>
             <Button title="Reset" onPress={resetTransform} />
             {models.current.length >= 3 ? <Button title="Next Model" onPress={loadModel} /> : <Button title="Add Model" onPress={loadModel} />}
             {!isRotating ? <Button title="Rotate" onPress={selectRotate}/> : <Button title="Roll" onPress={selectRoll}/> }
-          </View>
+          </View> */}
         </View>
       </GestureDetector>
+
+      <ThemeView style={styles.modelPicker}>
+        <ScrollView horizontal={true} >
+          {modelOptions.map(item => {
+            return (
+              <ThemeView key={item.name} onTouchEnd={() => {setColorPickerOpen(true); setSelectedModel(item.name); }} style={ item.name != selectedModel ? styles.model : styles.selectedModel }>
+                <Image source={item.image} style={styles.modelImage}></Image>
+                <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
+                  {item.name}
+                </ThemeText>
+              </ThemeView>
+            );
+          })}
+        </ScrollView>
+      </ThemeView>
+
+      {colorPickerOpen ?
+        <ThemeView style={styles.colorPicker}>
+          <ScrollView horizontal={true} >
+            {colorPickerOptions.map(item => {
+              return (
+                <ThemeView key={item.name} onTouchEnd={() => {setSelectedColor(item.name);}} style={item.name != selectedColor ? styles.color : styles.selectedColor }>
+                  <Image source={item.image} style={styles.colorImage}></Image>
+                </ThemeView>
+              );
+            })}
+          </ScrollView>
+        </ThemeView>
+      :<></>}
+
+      <ThemeView style={colorPickerOpen ? styles.instructionContainer : styles.instructionContainerNoColor}>
+        <ThemeText style={styles.instructionText}>Select Garden And Finish</ThemeText>
+      </ThemeView>
+
+      <ThemeView style={styles.instructionContainerBottom}>
+        <ThemeText style={styles.instructionText}>Drag to move garden. Use two fingers to scale and {isRotating ? 'roll' : 'rotate'}.</ThemeText>
+      </ThemeView>
+
+      <ThemeView style={styles.buttons}>
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={resetTransform}>
+          Reset Position
+        </ThemeCTA>
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={loadModel}>
+          Add Garden
+        </ThemeCTA>
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={isRotating ? selectRoll : selectRotate}>
+          {isRotating ? 'Roll Mode' : 'Rotate Mode'}
+        </ThemeCTA>
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='primary' onPress={confirmDesign} >
+          Done
+        </ThemeCTA>
+      </ThemeView>
+
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  buttons: {
+    position: 'absolute',
+    bottom: 44,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: 'transparent'
+  },
+  buttonText: {
+    fontSize: 18,
+    lineHeight: 18,
+    textAlign: 'center',
+    textAlignVertical: 'center'
+
+  },
+  button: {
+    maxWidth: 95,
+    width: 95,
+    minWidth: 95,
+    fontSize: 18,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  instructionContainerBottom: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    bottom: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: '#000000', // transparent
+    // opacity:0.5,
+    left: 20,
+    right: 20,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+  },
+  instructionText:{
+    fontFamily: 'LatoItalic',
+    fontSize: 32,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -1, height: 1},
+    textShadowRadius: 10,
+    lineHeight: 32,
+  },
+  instructionContainer: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    top: 125,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: '#000000', // transparent
+    // opacity:0.5,
+    backgroundColor: 'transparent',
+    left: 20,
+    right: 20,
+    borderRadius: 20,
+  },
+  instructionContainerNoColor: {
+    // width: '100%',
+    height: 100,
+    position: 'absolute',
+    top: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: '#000000', // transparent
+    // opacity:0.5,
+    backgroundColor: 'transparent',
+    left: 20,
+    right: 20,
+    borderRadius: 20,
+  },
+  colorPicker: {
+    position: 'absolute',
+    top: 95,
+    left: 0,
+    right: 0,
+    width: '100%',
+    height: 50,
+    backgroundColor: 'transparent'
+  },
+  color: {
+    width: 45,
+    height: 45,
+    borderRadius: 8,
+    borderWidth: 0,
+    borderColor: 'white',
+    backgroundColor: 'transparent',
+    marginLeft: 20,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  selectedColor: {
+    width: 45,
+    height: 45,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'white',
+    backgroundColor: 'transparent',
+    marginLeft: 20,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  colorImage: {
+    width: 40,
+    height: 40,
+    objectFit: 'contain',
+  },
+  model: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    borderWidth: 0,
+    borderColor: 'white',
+    backgroundColor: 'transparent',
+    marginLeft: 20,
+    alignItems: 'center',
+    justifyContent: 'center'
+
+  },
+  selectedModel: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'white',
+    backgroundColor: 'transparent',
+    marginLeft: 20,
+    alignItems: 'center',
+    justifyContent: 'center'
+
+  },
+  modelImage: {
+    width: 60,
+    height: 60,
+    objectFit: 'contain',
+
+  },
+  modelText: {
+    fontFamily: 'Lato',
+    textAlign: 'center'
+
+  },
+  selectedModelText: {
+    fontFamily: 'Lato',
+    textAlign: 'center',
+
+  },
+  modelPicker: {
+    position: 'absolute',
+    top: 5,
+    left: 0,
+    right: 0,
+    width: '100%',
+    height: 90,
+    backgroundColor: 'transparent'
+
+  },
   image: {
     top: 0,
     bottom: 0,
@@ -446,7 +767,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: 'grey', // transparent
     objectFit: 'contain',
-    borderRadius: 25,
+    // borderRadius: 25,
     borderWidth: 0,
   },
   container: {
@@ -460,12 +781,5 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'transparent'
-  },
-  buttons: {
-    position: 'absolute',
-    bottom: 20,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
   },
 });

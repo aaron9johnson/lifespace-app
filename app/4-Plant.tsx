@@ -9,6 +9,9 @@ import Carousel, {
 } from "react-native-reanimated-carousel";
 import { useSharedValue } from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemeCTA } from "./aa/ThemeCTA";
+import { ThemeView } from "./aa/ThemeView";
+import { ThemeText } from "./aa/ThemeText";
 
 
 
@@ -210,9 +213,9 @@ export default function PlantScreen() {
 
     return (
       <View style={styles.mainContainer}>
-        <ThemedView style={styles.instructionContainer}>
-          <ThemedText type="title" style={{ textAlign: 'center', padding: 5}}>Drag plants into your garden</ThemedText>
-        </ThemedView>
+        <ThemeView style={styles.instructionContainer}>
+          <ThemeText style={styles.instructionText}>Drag plants into your garden</ThemeText>
+        </ThemeView>
         <View style={styles.dropZone}>
           {/* <Text style={styles.text}>Drop them here!</Text> */}
           <View style={[ drops1.color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops1.color  } ]}>
@@ -242,22 +245,42 @@ export default function PlantScreen() {
          ))}
         </View>
         {confirm == true ? <ThemedView style={styles.ctaContainer}>
-          <TouchableOpacity style={styles.ctaWrapper} onPress={confirmPlanting}>
+          <ThemeCTA onPress={confirmPlanting}>
+            Confirm
+          </ThemeCTA>
+          {/* <TouchableOpacity style={styles.ctaWrapper} onPress={confirmPlanting}>
             <ThemedText>
               Confirm
             </ThemedText>
-          </TouchableOpacity>
-          </ThemedView>:
+          </TouchableOpacity> */}
+
+          </ThemedView>
+        :
           <ThemedView style={styles.instructionContainer}>
-          <ThemedText type="title" style={{ textAlign: 'center', padding: 15, color: 'black', backgroundColor: 'white'}}>Pick a plant and drag it into the garden</ThemedText>
-        </ThemedView>
-          }
+            <ThemedText type="title" style={{ textAlign: 'center', padding: 15, color: 'black', backgroundColor: 'white'}}>Pick a plant and drag it into the garden</ThemedText>
+          </ThemedView>
+        }
       </View>
     );
 }
 
 let CIRCLE_RADIUS = 30;
 const styles = StyleSheet.create({
+
+  instructionText:{
+    fontFamily: 'LatoItalic',
+    fontSize: 32,
+    textAlign: 'center',
+    lineHeight: 32,
+    color: '#78909c', // darker grey
+  },
+
+  instructionContainer: {
+    marginTop: 20,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   ctaWrapper: {
     backgroundColor: '#ef7e47', // orange
     
@@ -275,7 +298,8 @@ const styles = StyleSheet.create({
   },
   ctaContainer: {
     top: 80,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    padding: 16
 
   },
   img: {
