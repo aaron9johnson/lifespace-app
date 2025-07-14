@@ -59,8 +59,6 @@ export default function App() {
   const [activeGarden, setActiveGarden] = useState(0)
   const [colorPickerOpen, setColorPickerOpen] = useState(true)
 
-
-
   const resetTransform = () => {
     switch (activeGarden) {
       case 1:
@@ -199,24 +197,8 @@ function updateTranslate(e) {
   const gesture = Gesture.Simultaneous(pinchGesture, rotateGesture, panGesture);
 
   const updateModel = async (model) => {
-    
-    const objAsset = Asset.fromModule(model.obj);
-    const mtlAsset = Asset.fromModule(model.mtl);
-    await Promise.all([objAsset.downloadAsync(), mtlAsset.downloadAsync()]);
 
-    const mtlLoader = new MTLLoader();
-    // mtlLoader.setPath('@/assets/models/');
-    // mtlLoader.setResourcePath('@/assets/models/');
-    const mtlText = await fetch(mtlAsset.uri).then((res) => res.text());
-    const materials = mtlLoader.parse(mtlText);
-    materials.preload();
-
-    const objLoader = new OBJLoader();
-
-    objLoader.setMaterials(materials);
-    // objLoader.setPath('@/assets/models/')
-    const objText = await fetch(objAsset.uri).then((res) => res.text());
-    const object = objLoader.parse(objText);
+    const object = await loadOBJ(model);
 
     switch (activeGarden) {
       case 1:
@@ -244,38 +226,14 @@ function updateTranslate(e) {
     // object.add(new THREE.AmbientLight(0xffffff, 100000))
     models.current.push(object);
   }
-
-  const onProgress = function(xhr) {
-    if (xhr.lengthComputable) {
-      const percentComplete = xhr.loaded / xhr.total * 100;
-      console.log(Math.round(percentComplete) + '% downloaded');
-    }
-  };
-  const loadOBJ = async () => {
+  
+  const loadOBJ = async (model) => {
+    console.log("loadOBJ: ", model)
     const obj = await ExpoTHREE.loadDaeAsync({
-      asset: require('@/assets/models/low_rider/low_rider.dae'),
+      asset: model.dae,
       onAssetRequested: (m) => {
-        switch (m) {
-          case "METAL.jpg":
-            return Asset.fromModule(require('@/assets/models/low_rider/METAL.jpg')).downloadAsync();
-          case "BIRD_LOGO.jpg":
-            return Asset.fromModule(require('@/assets/models/low_rider/BIRD_LOGO.jpg')).downloadAsync();
-          case "Cedar_side.jpg": 
-            return Asset.fromModule(require('@/assets/models/low_rider/Cedar_side.jpg')).downloadAsync();
-          case "OFF_WHITE.jpg":
-            return Asset.fromModule(require('@/assets/models/low_rider/OFF_WHITE.jpg')).downloadAsync();
-          case "RAW_CEDAR_GRAIN.jpg":
-            return Asset.fromModule(require('@/assets/models/low_rider/RAW_CEDAR_GRAIN.jpg')).downloadAsync();
-          case "RAW_CEDAR_LONG.jpg":
-            return Asset.fromModule(require('@/assets/models/low_rider/RAW_CEDAR_LONG.jpg')).downloadAsync();
-          case "SUB_SYSTEM.jpg":
-            return Asset.fromModule(require('@/assets/models/low_rider/SUB_SYSTEM.jpg')).downloadAsync();
-
-          default:
-            break;
-        }
         console.log("onAssetRequested: ", m)
-        return Asset.fromModule(m).downloadAsync();
+        return Asset.fromModule(model.daeImages[m]).downloadAsync();
       },
       onProgress: () => {
         console.log("onProgress")
@@ -284,14 +242,14 @@ function updateTranslate(e) {
     return obj.scene;
   }
 
-  const loadModel = async () => {
+  const loadModel = async (model) => {
     setColorPickerOpen(true)
     if (models.current.length >= 3) {
       setActiveGarden(activeGarden % 3 + 1)
       return;
     }
     
-    const object = await loadOBJ();
+    const object = await loadOBJ(model);
 
     switch (activeGarden) {
     case 0:
@@ -360,11 +318,11 @@ function updateTranslate(e) {
     // removes the warning EXGL: gl.pixelStorei() doesn't support this parameter yet!
     const pixelStorei = gl.pixelStorei.bind(gl);
     gl.pixelStorei = function (...args) {
-        const [parameter] = args;
-        switch (parameter) {
-            case gl.UNPACK_FLIP_Y_WEBGL:
-                return pixelStorei(...args);
-        }
+      const [parameter] = args;
+      switch (parameter) {
+        case gl.UNPACK_FLIP_Y_WEBGL:
+          return pixelStorei(...args);
+      }
     };
 
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
@@ -388,16 +346,12 @@ function updateTranslate(e) {
     dirLight.position.set( -1, 0.75, 1 );
     dirLight.position.multiplyScalar( 50);
     dirLight.name = "dirlight";
-    
-
     scene.add( dirLight );
 
     dirLight.castShadow = true;
-    
     dirLight.shadow.mapSize.width = dirLight.shadow.mapSize.height = 1024*2;
 
     const d = 300;
-
     dirLight.shadow.camera.left = -d;
     dirLight.shadow.camera.right = d;
     dirLight.shadow.camera.top = d;
@@ -416,7 +370,7 @@ function updateTranslate(e) {
     scene.add(modelGroup2.current);
     scene.add(modelGroup3.current);
 
-    await loadModel(); // Load initial model
+    await loadModel(Data().gardens[0].colors[0]); // Load initial model
 
     const render = () => {
       
@@ -483,7 +437,8 @@ function updateTranslate(e) {
               <ThemeView key={item.name} onTouchEnd={() => {
                 setColorPickerOpen(true);
                 setSelectedModel(item.name);
-                updateModel(item);
+                updateModel(item.colors[0]);
+                setColorPickerOptions(item.colors);
               }} style={ item.name != selectedModel ? styles.model : styles.selectedModel }>
                 <Image source={item.image} style={styles.modelImage}></Image>
                 <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
@@ -500,7 +455,9 @@ function updateTranslate(e) {
           <ScrollView horizontal={true} >
             {colorPickerOptions.map(item => {
               return (
-                <ThemeView key={item.name} onTouchEnd={() => {setSelectedColor(item.name);}} style={item.name != selectedColor ? styles.color : styles.selectedColor }>
+                <ThemeView key={item.name} onTouchEnd={() => {setSelectedColor(item.name);
+                  updateModel(item);
+                }} style={item.name != selectedColor ? styles.color : styles.selectedColor }>
                   <Image source={item.image} style={styles.colorImage}></Image>
                 </ThemeView>
               );
@@ -521,7 +478,9 @@ function updateTranslate(e) {
         <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={resetTransform}>
           Reset Position
         </ThemeCTA>
-        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={loadModel}>
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={() => {
+          loadModel(Data().gardens[0].colors[0]);
+          }}>
           Add Garden
         </ThemeCTA>
         <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={isRotating ? selectRoll : selectRotate}>
