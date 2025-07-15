@@ -22,13 +22,13 @@ export default function Index() {
       </TouchableOpacity>
       <TouchableOpacity style={styles.cta} onPress={() => {
           // router.dismissAll()
-          router.replace('/4-Plant')
+          router.replace('/5-Plant')
         }}>
         <Text style={styles.ctaText}>Plant</Text>
       </TouchableOpacity>
         <TouchableOpacity style={styles.cta} onPress={() => {
           // router.dismissAll()
-          router.replace('/6-Home');
+          router.replace('/7-Home');
         }}>
         <Text style={styles.ctaText}>Home6</Text>
       </TouchableOpacity>

@@ -92,7 +92,7 @@ export default function DesignScreen() {
         <ThemeCTA type='borderless' onPress={() => {
           router.dismissAll()
           router.replace({ 
-            pathname: '/6-Home',
+            pathname: '/7-Home',
             params: {
               image: image,
               gardens: gardens,

@@ -38,18 +38,18 @@ export default function App() {
   const modelGroup2 = useRef(new THREE.Group());
   const modelGroup3 = useRef(new THREE.Group());
 
-  const scaleOrigin = useSharedValue(1.0);
+  const scaleOrigin = useSharedValue(0.25);
   const translateOrigin = useSharedValue({ x: 0, y: 0 });
 
-  const scale1 = useSharedValue(1.0);
+  const scale1 = useSharedValue(0.25);
   const rotate1 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate1 = useSharedValue({ x: 0, y: 0 });
 
-  const scale2 = useSharedValue(1.0);
+  const scale2 = useSharedValue(0.25);
   const rotate2 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate2 = useSharedValue({ x: 0, y: 0 });
 
-  const scale3 = useSharedValue(1.0);
+  const scale3 = useSharedValue(0.25);
   const rotate3 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate3 = useSharedValue({ x: 0, y: 0 });
 
@@ -62,17 +62,17 @@ export default function App() {
   const resetTransform = () => {
     switch (activeGarden) {
       case 1:
-        scale1.value = 1.0;
+        scale1.value = 0.25;
         rotate1.value = { x: 0, y: 0, z: 0 };
         translate1.value = { x: 0, y: 0 };
         break;
       case 2:
-        scale2.value = 1.0;
+        scale2.value = 0.25;
         rotate2.value = { x: 0, y: 0, z: 0 };
         translate2.value = { x: 0, y: 0 };
         break;
       case 3:
-        scale3.value = 1.0;
+        scale3.value = 0.25;
         rotate3.value = { x: 0, y: 0, z: 0 };
         translate3.value = { x: 0, y: 0 };
         break;
@@ -202,25 +202,28 @@ function updateTranslate(e) {
 
     switch (activeGarden) {
       case 1:
-        object.rotation.set(rotate1.value.x, rotate1.value.y, rotate1.value.z)
-        object.position.set(translate1.value.x, translate1.value.y, 0)
-        object.scale.set(scale1.value, scale1.value, scale1.value);
         modelGroup1.current.clear()
         modelGroup1.current.add(object);
+        // object.rotation.set(rotate1.value.x, rotate1.value.y, rotate1.value.z)
+        object.position.set(translate1.value.x, translate1.value.y, 0)
+        object.scale.set(scale1.value, scale1.value, scale1.value);
+        
         break;
       case 2:
-        object.rotation.set(rotate2.value.x, rotate2.value.y, rotate2.value.z)
-        object.position.set(translate2.value.x, translate2.value.y, 0)
-        object.scale.set(scale2.value, scale2.value, scale2.value);
         modelGroup2.current.clear()
         modelGroup2.current.add(object);
+        // object.rotation.set(rotate2.value.x, rotate2.value.y, rotate2.value.z)
+        object.position.set(translate2.value.x, translate2.value.y, 0)
+        object.scale.set(scale2.value, scale2.value, scale2.value);
+        
         break;
       case 3:
-        object.rotation.set(rotate3.value.x, rotate3.value.y, rotate3.value.z)
-        object.position.set(translate3.value.x, translate3.value.y, 0)
-        object.scale.set(scale3.value, scale3.value, scale3.value);
         modelGroup3.current.clear()
         modelGroup3.current.add(object);
+        // object.rotation.set(rotate3.value.x, rotate3.value.y, rotate3.value.z)
+        object.position.set(translate3.value.x, translate3.value.y, 0)
+        object.scale.set(scale3.value, scale3.value, scale3.value);
+        
         break;
     }
     // object.add(new THREE.AmbientLight(0xffffff, 100000))
@@ -377,6 +380,7 @@ function updateTranslate(e) {
       requestAnimationFrame(render);
 
       checkObjects()
+      console.log("rendering scene: ", rotate1.value)
       
       renderer.render(scene, camera);
       gl.endFrameEXP();
@@ -396,7 +400,7 @@ function updateTranslate(e) {
     const snapshot = await handleGLSnapshot()
     console.log('confirmDesign: ', image);
     router.push({ 
-      pathname: '/4-Plant',
+      pathname: '/4-Conditions',
       params: {
         image: image,
         gardens: snapshot
@@ -433,12 +437,23 @@ function updateTranslate(e) {
       <ThemeView style={styles.modelPicker}>
         <ScrollView horizontal={true} >
           {modelOptions.map(item => {
+            if (item.name != "LowRider" && item.name != "HighRise") {
+              return (
+              <ThemeView key={item.name} onTouchEnd={() => {}} style={ [item.name != selectedModel ? styles.model : styles.selectedModel, {opacity: 0.15}]}>
+                <Image source={item.image} style={styles.modelImage}></Image>
+                <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
+                  {item.name}
+                </ThemeText>
+              </ThemeView>
+            );
+            }
             return (
               <ThemeView key={item.name} onTouchEnd={() => {
                 setColorPickerOpen(true);
                 setSelectedModel(item.name);
                 updateModel(item.colors[0]);
                 setColorPickerOptions(item.colors);
+                setSelectedColor(item.colors[0].name);
               }} style={ item.name != selectedModel ? styles.model : styles.selectedModel }>
                 <Image source={item.image} style={styles.modelImage}></Image>
                 <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
@@ -454,6 +469,13 @@ function updateTranslate(e) {
         <ThemeView style={styles.colorPicker}>
           <ScrollView horizontal={true} >
             {colorPickerOptions.map(item => {
+              if (item.name != "Raw Cedar" && item.name != "Silver Patina") {
+                return (
+                <ThemeView key={item.name} onTouchEnd={() => {}} style={[item.name != selectedColor ? styles.color : styles.selectedColor, {opacity: 0.15}]}>
+                  <Image source={item.image} style={styles.colorImage}></Image>
+                </ThemeView>
+              );
+              }
               return (
                 <ThemeView key={item.name} onTouchEnd={() => {setSelectedColor(item.name);
                   updateModel(item);
@@ -471,7 +493,7 @@ function updateTranslate(e) {
       </ThemeView>
 
       <ThemeView style={styles.instructionContainerBottom}>
-        <ThemeText style={styles.instructionText}>Drag to move garden. Use two fingers to scale and {isRotating ? 'roll' : 'rotate'}.</ThemeText>
+        <ThemeText style={styles.instructionText}>Drag to move garden. Use two fingers to scale and {!isRotating ? 'roll' : 'rotate'}.</ThemeText>
       </ThemeView>
 
       <ThemeView style={styles.buttons}>

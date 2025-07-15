@@ -169,7 +169,7 @@ export default function PlantScreen() {
 
   const confirmPlanting = async () => {
     router.push({ 
-      pathname: '/5-Buy',
+      pathname: '/6-Buy',
       params: {
         image: image,
         plant1: drops1.name,
