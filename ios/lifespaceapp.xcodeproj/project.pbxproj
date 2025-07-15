@@ -382,6 +382,7 @@
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = lifespaceapp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LifeSpace;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -395,7 +396,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron9johnson.lifespaceapp;
-				PRODUCT_NAME = "lifespaceapp";
+				PRODUCT_NAME = lifespaceapp;
 				SWIFT_OBJC_BRIDGING_HEADER = "lifespaceapp/lifespaceapp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -414,6 +415,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PEHCFRL7FZ;
 				INFOPLIST_FILE = lifespaceapp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LifeSpace;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -427,7 +429,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron9johnson.lifespaceapp;
-				PRODUCT_NAME = "lifespaceapp";
+				PRODUCT_NAME = lifespaceapp;
 				SWIFT_OBJC_BRIDGING_HEADER = "lifespaceapp/lifespaceapp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
