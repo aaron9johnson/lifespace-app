@@ -243,7 +243,14 @@ export default function Data() {
                 planting: require('@/assets/images/arugula-planting.png'),
                 seasons: [ 'Spring', 'Autumn' ],
                 description: 'Direct seed 16 per sq/ft',
-                color: '#f1f6ee'
+                color: '#f1f6ee',
+                gardening: {
+                    transplant: '',
+                    seed: ' • Arugula 16 per sq/ft',
+                    nurture: '',
+                    grow: 'Harvest arugula by cutting the outer leaves of each plant, allowing 1/3 of the plant to remain growing for a continuous harvest.',
+
+                }
             },
             {
                 name: 'Patio Toms',
@@ -252,7 +259,14 @@ export default function Data() {
                 planting: require('@/assets/images/toms-planting.png'),
                 seasons: [ 'Summer', 'Autumn' ],
                 description: 'Good plant......',
-                color: '#fbe8e9'
+                color: '#fbe8e9',
+                gardening: {
+                    transplant: 'Select a compact patio or determinate type of tomato. When evening termperatures are above 10 C, transplant seedlings into your garden.\n • Tomato Seedlings 1 per sq/ft',
+                    seed: '',
+                    nurture: "Pinch 'suckers' off tomatoes to encourage more fruit production.",
+                    grow: 'Harvest tomatoes as they ripen.',
+
+                }
             },
             {
                 name: 'Radishes',
@@ -261,7 +275,14 @@ export default function Data() {
                 planting: require('@/assets/images/radishes-planting.png'),
                 seasons: [ 'Spring', 'Autumn'  ],
                 description: 'Good plant......',
-                color: '#fbe8e9'
+                color: '#fbe8e9',
+                gardening: {
+                    transplant: 'Root crops (Radishes) prefer to be directly seeded.',
+                    seed: ' • Radish 16 per sq/ft',
+                    nurture: '',
+                    grow: 'Pull radishes out when their shoulders begin to push out of the soil (about the size of a small golf ball).',
+
+                }
             },
             {
                 name: 'Parsley',
@@ -270,7 +291,14 @@ export default function Data() {
                 planting: require('@/assets/images/parsley-planting.png'),
                 seasons: [ 'Spring', 'Summer', 'Autumn' ],
                 description: 'Good plant......',
-                color: '#eef9db'
+                color: '#eef9db',
+                gardening: {
+                    transplant: ' • Parsley 4 per sq/ft',
+                    seed: '',
+                    nurture: 'If parsley bolts (begins to flower), remove plants and reseed or transplant new seedlings. To preserve fresh herbs through the late autumn and winter, harvest and put them in ice cube trays with a neutral oil.',
+                    grow: 'Harvest Parsley as needed.',
+
+                }
             },
             {
                 name: 'Carrots',
@@ -279,7 +307,14 @@ export default function Data() {
                 planting: require('@/assets/images/carrots-planting.png'),
                 seasons: [ 'Spring', 'Summer', 'Autumn' ],
                 description: 'Good plant......',
-                color: '#fef6e6'
+                color: '#fef6e6',
+                gardening: {
+                    transplant: 'Root crops (Carrots) prefer to be directly seeded.',
+                    seed: ' • Carrots 16 per sq/ft',
+                    nurture: '',
+                    grow: 'Harvest Carrots when they reach desired size. Root crops can remain in the ground as frost approaches. They will continue to grow slowly. Add a 2-3" layer of leaf mulch around the crops for added protection.',
+
+                }
             },
             {
                 name: 'Peppers',
@@ -288,7 +323,14 @@ export default function Data() {
                 planting: require('@/assets/images/peppers-planting.png'),
                 seasons: ['Summer' ],
                 description: 'Good plant......',
-                color: '#fbe8e9'
+                color: '#fbe8e9',
+                gardening: {
+                    transplant: ' • Choose your favourite peppers: bell peppers / hot peppers and plant 1 per sq/ft from seedling.',
+                    seed: ' • To maximize space, consider planting cilantro by seed around and under pepper plants.',
+                    nurture: 'Peppers that set after late August will not usually develop or ripen. Pull out the entire bush just before the first frost and hang it upside down in a warm, dry place to ripen hot peppers.',
+                    grow: 'Peppers are edible at any stage of growth, but the flavour will be different. Peppers picked early will usually have less sweetness and more bitterness. Peppers will change colour as they ripen. Harvest peppers as you wish! Pick off remaining peppers as the end of the season approaches. Mulch garden for the winter.',
+
+                }
             },
             {
                 name: 'Kale',
@@ -297,7 +339,14 @@ export default function Data() {
                 planting: require('@/assets/images/kale-planting.png'),
                 seasons: ['Spring', 'Summer', 'Autumn' ],
                 description: 'Good plant......',
-                color: '#eef9db'
+                color: '#eef9db',
+                gardening: {
+                    transplant: ' • Kale 1 per sq/ft',
+                    seed: '',
+                    nurture: 'Spring planted Kale will continue to grow through the summer into the autumn. Pick the bottom leaves, and work your way up. Kale will continue to grow through the winter months. It tastes sweeter in colder temperatures when it turnes starches into sugars.',
+                    grow: '',
+
+                }
             },
             {
                 name: 'Mustard',
@@ -306,7 +355,14 @@ export default function Data() {
                 planting: require('@/assets/images/mustard-planting.png'),
                 seasons: ['Spring'],
                 description: 'Good plant......',
-                color: '#eef9db'
+                color: '#eef9db',
+                gardening: {
+                    transplant: '',
+                    seed: ' • Mustard Greens 16 per sq/ft',
+                    nurture: '',
+                    grow: 'Harvest mustard greens when they are small 2-4" tall',
+
+                }
             }
 
         ]
@@ -333,7 +389,7 @@ export default function Data() {
             //     color: '#3CB043'
             // },
 
-            
+
 
 
 

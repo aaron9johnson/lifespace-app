@@ -180,7 +180,7 @@ export default function PlantScreen() {
 
   const confirmPlanting = async () => {
     router.push({ 
-      pathname: '/6-Buy',
+      pathname: '/6-Steps',
       params: {
         image: image,
         gardens: gardens,

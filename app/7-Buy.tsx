@@ -81,7 +81,7 @@ export default function BuyScreen() {
         <ThemeCTA type='borderless' onPress={() => {
           router.dismissAll()
           router.replace({ 
-            pathname: '/7-Home',
+            pathname: '/8-Home',
             params: {
               image: image,
               gardens: gardens,
