@@ -20,70 +20,59 @@ class Plant {
     this.color  = color;
   }
 }
-
-export default function DesignScreen() {
+import Data from './data'
+export default function BuyScreen() {
   const router = useRouter();
     const nullPlant = new Plant('', '', '#000000');
-  const { image, plant1, plant2, plant3, gardens} = useLocalSearchParams<{ image: any; plant1: any; plant2: any; plant3: any; gardens: any; }>();
-  const plants = (plant1, plant2, plant3)
-  const [plantData, setPlantData] = useState(
-      [
-        new Plant('Cucc', require('@/assets/images/cuc.png'), '#3CB043'),
-        new Plant('Dill', require('@/assets/images/dill.png'), '#5DBB63'),
-        new Plant('Carr', require('@/assets/images/carrot.png'), '#466D1D'),
-        new Plant('Toma', require('@/assets/images/tomato.png'), '#234F1E'),
-        new Plant('Cucc', require('@/assets/images/arug.png'), '#3CB043'),
-        new Plant('Dill', require('@/assets/images/dill.png'), '#5DBB63'),
-        new Plant('Carr', require('@/assets/images/carrot.png'), '#466D1D'),
-        new Plant('Toma', require('@/assets/images/tomato.png'), '#234F1E'),
-      ]
-    )
+  const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; plants: any; }>();
+  const [plantData, setPlantData] = useState(Data().plants);
+  const [gardenData, setGardenData] = useState(Data().gardens);
+  console.log('BuyScreen -> plants',  plants);
+
+  const garden = gardenData.find((garden) => garden.name == types.split(',')[0]);
+  const color = (garden?.colors || []).find((color) => color.name == models.split(',')[0]);
+
   return (
     <ThemedView style={styles.screen}>
+      <Text style={{ fontSize: 48 }}>{garden?.buy?.name}</Text>
       <ThemedView style={styles.titleContainer}>
-        <View style={styles.dropZone}>
-          { plantData.filter((i) => { return i.name == plant1; }).map((item, index) => (
+        <Image source={image} style={styles.image}></Image>
+        <Image source={gardens} style={[styles.image, {backgroundColor: 'transparent', marginTop: -200 }]}></Image>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        {/* <Text style={{ fontSize: 48 }}>{garden?.buy?.name}</Text> */}
+        <Text style={{ fontSize: 24 }}>{garden?.buy?.rating} / 5.0 ({garden?.buy?.reviews})</Text>
+        <Text style={{ fontSize: 32 }}>${garden?.buy?.price}.00</Text>
+        <Text style={{ fontSize: 16 }}>{garden?.buy?.description}</Text>
+        {/* <ThemeCTA textstyle={styles.buttonText} style={styles.button} onPress={ ()=>{ Linking.openURL(color?.checkout || '')}}>
+          Purchase
+        </ThemeCTA> */}
+        
+
+        <Text style={{ fontSize: 32 }}>Potential Annual Harvest: </Text>
+        <View style={{ width: '100%', flexDirection: 'row', backgroundColor: 'white', flexWrap: 'wrap', justifyContent: 'left', alignItems: 'center' }}>
+          { plants.split(',').map((plantName) => plantData.find((plant) => plant.name == plantName)).map((item, index) => (
             <>
-              { index == 0 ? <View>
-                <Image
+              <View>
+                {item && item.image != '' ? <Image
                   source={item.image}
-                  style={[styles.image,{ width: 100, height: 100 }]}
-                ></Image>
-              </View> : <></>}
-            </>
-          ))}
-          { plantData.filter((i) => { return i.name == plant2; }).map((item, index) => (
-            <>
-              { index == 0 ? <View>
-                <Image
-                  source={item.image}
-                  style={[styles.image,{ width: 100, height: 100 }]}
-                ></Image>
-              </View> : <></>}
-            </>
-          ))}
-          { plantData.filter((i) => { return i.name == plant3; }).map((item, index) => (
-            <>
-              { index == 0 ? <View>
-                <Image
-                  source={item.image}
-                  style={[styles.image,{ width: 100, height: 100 }]}
-                ></Image>
-              </View> : <></>}
+                  style={[styles.image,{ width: 50, height: 50 }]}
+                ></Image> : <></>}
+              </View>
             </>
           ))}
         </View>
-        <Image source={image} style={styles.image}></Image>
-        <Image source={gardens} style={[styles.image, {backgroundColor: 'transparent', marginTop: -300 }]}></Image>
+        
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Text style={{ fontSize: 48 }}>LowRider Self-Watering Planter</Text>
-        <Text style={{ fontSize: 24 }}>***** (24)</Text>
-        <Text style={{ fontSize: 32 }}>$339.00</Text>
-      </ThemedView>
+      {/* <ThemedView>
+        <ThemedText style={{ fontSize: 24, backgroundColor: 'transparent' }}>Potential Harvest: </ThemedText>
+        <View style={styles.dropZone}>
+          
+        </View>
+      </ThemedView> */}
 
       <View style={styles.container}>
-        <ThemeCTA textstyle={styles.buttonText} style={styles.button} onPress={ ()=>{ Linking.openURL('https://lifespace-projects.myshopify.com/cart/31911805157430:1')}}>
+        <ThemeCTA textstyle={styles.buttonText} style={styles.button} onPress={ ()=>{ Linking.openURL(color?.checkout || '')}}>
           Checkout
         </ThemeCTA>
       </View>
@@ -96,6 +85,9 @@ export default function DesignScreen() {
             params: {
               image: image,
               gardens: gardens,
+              types: types,
+              models: models,
+              conditions: conditions,
               plants: plants,
             }
           });
@@ -108,9 +100,15 @@ export default function DesignScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    paddingTop: 26,
+  },
+  buttonText: {
+    marginTop: 10,
+  },
   image: {
-    width: 300,
-    height: 300,
+    width: 200,
+    height: 200,
     backgroundColor: 'white',
   },
   reactLogo: {
@@ -211,8 +209,12 @@ const styles = StyleSheet.create({
   dropZone: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 50,
-    marginTop: 50,
+    // marginLeft: 50,
+    // marginTop: 50,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    width: 300,
+    backgroundColor: 'red'
   },
   dropZone1: {
     height: 100,

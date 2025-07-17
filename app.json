@@ -1,7 +1,6 @@
 {
   "expo": {
     "name": "lifespace-app",
-    "displayName": "LifeSpaceApp",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aaron9johnson.lifespaceapp"
@@ -45,7 +44,9 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

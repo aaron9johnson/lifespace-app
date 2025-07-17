@@ -15,6 +15,7 @@ import { ThemeText } from "./aa/ThemeText";
 
 
 
+
 class Draggable extends Component {
   constructor(props) {
     super(props);
@@ -58,7 +59,7 @@ class Draggable extends Component {
     console.log('gesture.moveY: ', gesture.moveY);
     console.log('color: ', e.state.plant.color);
     let remove = false;
-    if (gesture.moveY < 200 + 50){
+    if (gesture.moveY < 200 + 50 + 50){
       if (gesture.moveX > 0 + 50 && gesture.moveX < 100 + 50){
         remove = true;
         e.state.dropped(1, e.state.plant);
@@ -72,14 +73,14 @@ class Draggable extends Component {
     }
     
     if (remove) {
-      Animated.timing(e.state.opacity, {
-        toValue: 0,
-        duration: 1000
-      }).start(() =>
-        e.setState({
+      e.setState({
           showDraggable: false
         })
-      );
+      // Animated.timing(e.state.opacity, { toValue: 0, duration: 1000 }).start(() => {
+      //   e.setState({
+      //     showDraggable: false
+      //   })
+      // });
     } 
   }
 
@@ -99,7 +100,7 @@ class Draggable extends Component {
       return (
         <View style={{ position: "absolute"}}>
           <View
-          style={{ backgroundColor: this.state.plant.color, width: 100, height: 100 }}
+          style={{ backgroundColor: this.state.plant.color, width: 100, height: 100 , borderRadius: 8}}
           >
           <Animated.View
             {...this.panResponder.panHandlers}
@@ -117,35 +118,39 @@ class Draggable extends Component {
   }
 }
 
-class Plant {
-  name: string;
-  image: any;
-  color: string;
-  constructor(name: string, image: any, color: string) {
-    this.name  = name;
-    this.image  = image;
-    this.color  = color;
-  }
-}
+// class Plant {
+//   name: string;
+//   image: any;
+//   color: string;
+//   seasons: string;
+//   constructor(name: string, image: any, color: string, seasons: string) {
+//     this.name  = name;
+//     this.image  = image;
+//     this.color  = color;
+//     this.seasons = seasons;
+//   }
+// }
 
+import Data from './data'
 
 export default function PlantScreen() {
   const [plantRefreshKey, setPlantRefreshKey] = useState(0)
-  const [plantData, setPlantData] = useState(
-    [
-      new Plant('Cucc', require('@/assets/images/cuc.png'), '#3CB043'),
-      new Plant('Dill', require('@/assets/images/dill.png'), '#5DBB63'),
-      new Plant('Carr', require('@/assets/images/carrot.png'), '#466D1D'),
-      new Plant('Toma', require('@/assets/images/tomato.png'), '#234F1E'),
-      new Plant('Cucc', require('@/assets/images/arug.png'), '#3CB043'),
-      new Plant('Dill', require('@/assets/images/dill.png'), '#5DBB63'),
-      new Plant('Carr', require('@/assets/images/carrot.png'), '#466D1D'),
-      new Plant('Toma', require('@/assets/images/tomato.png'), '#234F1E'),
-    ]
-  )
-  const carouselRef = useRef(null);
+  const [plantData, setPlantData] = useState(Data().plants);
+  //   [
+  //     new Plant('Cucc1', require('@/assets/images/cucumber.png'), '#3CB043', '0'),
+  //     new Plant('Dill2', require('@/assets/images/cucumber.png'), '#5DBB63', '0'),
+  //     new Plant('Carr3', require('@/assets/images/cucumber.png'), '#466D1D', '0'),
+  //     new Plant('Toma4', require('@/assets/images/cucumber.png'), '#234F1E', '1'),
+  //     new Plant('Cucc5', require('@/assets/images/cucumber.png'), '#3CB043', '1'),
+  //     new Plant('Dill6', require('@/assets/images/cucumber.png'), '#5DBB63', '1'),
+  //     new Plant('Carr7', require('@/assets/images/cucumber.png'), '#466D1D', '2'),
+  //     new Plant('Toma8', require('@/assets/images/cucumber.png'), '#234F1E', '2'),
+  //   ]
+  // )
+  // const carouselInstanceRef = useRef(null);
   const addDragableRef = useRef(null);
   const carouselInstanceRef = useRef<ICarouselInstance>(null);
+
     const progress = useSharedValue<number>(0);
     
     const onPressPagination = (index: number) => {
@@ -160,11 +165,17 @@ export default function PlantScreen() {
     };
     
   const router = useRouter();
-  const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
-  const nullPlant = new Plant('', '', '#000000');
-  const [drops1, setDrops1] = useState(nullPlant);
-  const [drops2, setDrops2] = useState(nullPlant);
-  const [drops3, setDrops3] = useState(nullPlant);
+  const { image, gardens, types, models, conditions } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; }>();
+  const nullPlant = {
+                name: '',
+                image: null,
+                icon: null,
+                spacing: null,
+                planting: '',
+                description: '',
+                color: '#000000'
+            };
+  const [drops, setDrops] = useState([[nullPlant, nullPlant, nullPlant], [nullPlant, nullPlant, nullPlant], [nullPlant, nullPlant, nullPlant]]);
   const [confirm, setConfirm] = useState(false);
 
   const confirmPlanting = async () => {
@@ -172,21 +183,22 @@ export default function PlantScreen() {
       pathname: '/6-Buy',
       params: {
         image: image,
-        plant1: drops1.name,
-        plant2: drops2.name,
-        plant3: drops3.name,
         gardens: gardens,
+        types:types,
+        models: models,
+        conditions: conditions,
+        plants: drops.map((i) => i.map((j) => j.name)).join(','),
       }
     });
   };
   const check3Plants = async (i) => {
-    if (i != 1 && (!drops1 || drops1.color == nullPlant.color)) {
+    if (i != 1 && (!drops[0][0] || drops[0][0].color == nullPlant.color)) {
       return
     }
-    if (i != 2 && (!drops2 || drops2.color == nullPlant.color)) {
+    if (i != 2 && (!drops[0][1]  || drops[0][1].color == nullPlant.color)) {
       return
     }
-    if (i != 3 && (!drops3 || drops3.color == nullPlant.color)) {
+    if (i != 3 && (!drops[0][2]  || drops[0][2].color == nullPlant.color)) {
       return
     }
     if (!confirm){
@@ -194,12 +206,27 @@ export default function PlantScreen() {
     }
   }
   const checkDropped = (i, plant) => {
-    if (i === 1) {
-      setDrops1(plant);
-    } else if (i === 2) {
-      setDrops2(plant);
-    } else if (i === 3) {
-      setDrops3(plant);
+    console.log('carouselInstanceRef.current?.getCurrentIndex() ', carouselInstanceRef.current?.getCurrentIndex());
+    const index = (carouselInstanceRef.current?.getCurrentIndex() || 0)
+    
+    if (index === 0) {
+      setDrops((prevDrops) => {
+        const newDrops = [...prevDrops];
+        newDrops[index][i - 1] = plant;
+        return newDrops;
+      });
+    } else if (index === 1) {
+      setDrops((prevDrops) => {
+        const newDrops = [...prevDrops];
+        newDrops[index][i - 1] = plant;
+        return newDrops;
+      });
+    } else if (index === 2) {
+      setDrops((prevDrops) => {
+        const newDrops = [...prevDrops];
+        newDrops[index][i - 1] = plant;
+        return newDrops;
+      });
     }
     
     check3Plants(i);
@@ -210,40 +237,93 @@ export default function PlantScreen() {
   };
   const width = Dimensions.get("window").width;
   const height = Dimensions.get("window").height;
+  const data = [
+    { title: 'Item 1', color: 'red' },
+    { title: 'Item 2', color: 'blue' },
+    { title: 'Item 3', color: 'green' },
+  ];
+  const currentSeason = (index) => {
+    if (index == 0) {
+      return "Spring";
+    } else if (index == 1) {
+      return "Summer";
+    } else if (index == 2) {
+      return "Autumn";
+    }
+    return "";
+  }
 
     return (
       <View style={styles.mainContainer}>
         <ThemeView style={styles.instructionContainer}>
           <ThemeText style={styles.instructionText}>Drag plants into your garden</ThemeText>
         </ThemeView>
-        <View style={styles.dropZone}>
-          {/* <Text style={styles.text}>Drop them here!</Text> */}
-          <View style={[ drops1.color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops1.color  } ]}>
-            {drops1.image ? <Image
-              source={drops1.image}
-              style={{ width: 100, height: 100, backgroundColor: drops1.color }}
-            /> : <></>}
-          </View>
-          <View style={[ drops2.color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops2.color  }]}>
-            {drops2.image ? <Image
-              source={drops2.image}
-              style={{ width: 100, height: 100, backgroundColor: drops2.color }}
-            /> : <></>}
-          </View>
-          <View style={[ drops3.color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops3.color  }]}>
-            {drops3.image ? <Image
-              source={drops3.image}
-              style={{ width: 100, height: 100, backgroundColor: drops3.color }}
-            /> : <></>}
-          </View>
-        </View>
-        <View ref={addDragableRef} style={styles.row} key={plantRefreshKey}>
-          {plantData.map((item, index) => (
-            <View style={{ width: 100, height: 100, margin: 5,}}>
-              <Draggable dropped={checkDropped} plant={item}/>
+        <Carousel
+          ref={carouselInstanceRef}
+          width={width}
+          height={200}
+          data={data}
+          onProgressChange={progress}
+          onScrollEnd={(index) => {
+            setPlantRefreshKey(plantRefreshKey + 1); // refresh colors
+          }}
+          renderItem={({ index }) => (
+            <View>
+              
+              <View style={styles.dropZone}>
+                {/* <Text style={styles.text}>Drop them here!</Text> */}
+                <View style={[ drops[index][0].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][0].color  } ]}>
+                  {drops[index][0].image ? <Image
+                    source={drops[index][0].planting}
+                    style={{ width: 100, height: 100, backgroundColor: drops[index][0].color }}
+                  /> : <></>}
+                </View>
+                <View style={[ drops[index][1].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][1].color  }]}>
+                  {drops[index][1].image ? <Image
+                    source={drops[index][1].planting}
+                    style={{ width: 100, height: 100, backgroundColor: drops[index][1].color }}
+                  /> : <></>}
+                </View>
+                <View style={[ drops[index][2].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][2].color  }]}>
+                  {drops[index][2].image ? <Image
+                    source={drops[index][2].planting}
+                    style={{ width: 100, height: 100, backgroundColor: drops[index][2].color }}
+                  /> : <></>}
+                </View>
+              </View>
+              <ThemeView style={styles.instructionContainer}>
+                <TouchableOpacity style={styles.arrow} onPress={() => carouselInstanceRef.current?.prev()}>
+                    <ThemeText style={styles.arrowText} >{"<"}</ThemeText>
+                  </TouchableOpacity>
+                <ThemeText style={styles.instructionText}>{currentSeason(index)}</ThemeText>
+                <TouchableOpacity style={styles.arrow} onPress={() => carouselInstanceRef.current?.next()}>
+                    <ThemeText style={styles.arrowText} >{">"}</ThemeText>
+                  </TouchableOpacity>
+              </ThemeView>
+              {/* <View ref={addDragableRef} style={styles.row} key={plantRefreshKey}>
+                {plantData.map((item, index) => (
+                  <View style={{ width: 100, height: 100, margin: 5,}}>
+                    <Draggable dropped={checkDropped} plant={item}/>
+                  </View>
+                ))}
+              </View> */}
             </View>
-         ))}
-        </View>
+          )}
+        />
+        <Pagination.Basic
+              progress={progress}
+              data={data}
+              dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
+              containerStyle={{ gap: 5, marginTop: 10 }}
+              onPress={onPressPagination}
+            />
+        <View ref={addDragableRef} style={styles.row} key={plantRefreshKey}>
+                {plantData.filter((i) => i.seasons.includes(currentSeason(carouselInstanceRef.current?.getCurrentIndex() || 0) + "")).map((item, index) => (
+                  <View style={{ width: 100, height: 100, margin: 5 }}>
+                    <Draggable dropped={checkDropped} plant={item}/>
+                  </View>
+                ))}
+              </View>
         {confirm == true ? <ThemedView style={styles.ctaContainer}>
           <ThemeCTA onPress={confirmPlanting}>
             Confirm
@@ -266,6 +346,21 @@ export default function PlantScreen() {
 
 let CIRCLE_RADIUS = 30;
 const styles = StyleSheet.create({
+  arrow: {
+    width: 32,
+    height: 32, 
+    // backgroundColor: '#ef7e47', // orange
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 'auto'
+
+
+  },
+  arrowText: {
+    fontSize: 32,
+    lineHeight: 32,
+    color: '#78909c', // darker grey
+  },
 
   instructionText:{
     fontFamily: 'LatoItalic',
@@ -280,6 +375,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   ctaWrapper: {
     backgroundColor: '#ef7e47', // orange

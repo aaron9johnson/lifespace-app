@@ -1,3 +1,21 @@
+```
+npx expo install && npx expo prebuild && cd ios && pod install && cd .. && cd android && ./gradlew clean && cd .. && npx expo start
+```
+
+
+
+```
+react-native run-ios --udid 00008030-000425CC21F3802E
+
+npx expo prebuild
+cd ios && pod install && cd ..
+cd android && ./gradlew clean && cd ..
+cd android && ./gradlew build && cd ..
+
+npx expo start
+```
+
+
 
 ```
 npm install

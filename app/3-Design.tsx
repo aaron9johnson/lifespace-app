@@ -20,11 +20,15 @@ import { ExpoWebGLRenderingContext, GLView } from 'expo-gl';
 import ExpoTHREE, { loadAsync, Renderer, TextureLoader } from 'expo-three';
 
 export default function App() {
+
+  const SCALE_MIN = 0.1;
+  const SCALE_MAX = 1.0;
+  const SCALE_INIT = 0.2;
   
   const glViewRef = useRef(null);
   const [colorPickerOptions, setColorPickerOptions] = useState(Data().gardens[0].colors)
   const [modelOptions, setModelOptions] = useState(Data().gardens)
-  const { image, gardens, plants } = useLocalSearchParams<{ image: any; gardens: any; plants: any; }>();
+  const { image } = useLocalSearchParams<{ image: any; }>();
   const router = useRouter();
 
   const [capturedImageUri, setCapturedImageUri] = useState(null);
@@ -38,18 +42,18 @@ export default function App() {
   const modelGroup2 = useRef(new THREE.Group());
   const modelGroup3 = useRef(new THREE.Group());
 
-  const scaleOrigin = useSharedValue(0.25);
+  const scaleOrigin = useSharedValue(SCALE_INIT);
   const translateOrigin = useSharedValue({ x: 0, y: 0 });
 
-  const scale1 = useSharedValue(0.25);
+  const scale1 = useSharedValue(SCALE_INIT);
   const rotate1 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate1 = useSharedValue({ x: 0, y: 0 });
 
-  const scale2 = useSharedValue(0.25);
+  const scale2 = useSharedValue(SCALE_INIT);
   const rotate2 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate2 = useSharedValue({ x: 0, y: 0 });
 
-  const scale3 = useSharedValue(0.25);
+  const scale3 = useSharedValue(SCALE_INIT);
   const rotate3 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate3 = useSharedValue({ x: 0, y: 0 });
 
@@ -59,20 +63,22 @@ export default function App() {
   const [activeGarden, setActiveGarden] = useState(0)
   const [colorPickerOpen, setColorPickerOpen] = useState(true)
 
+  const [gardenTypes, setGardenTypes] = useState([['LowRider', 'Raw Cedar'], [], []])
+
   const resetTransform = () => {
     switch (activeGarden) {
       case 1:
-        scale1.value = 0.25;
+        scale1.value = SCALE_INIT;
         rotate1.value = { x: 0, y: 0, z: 0 };
         translate1.value = { x: 0, y: 0 };
         break;
       case 2:
-        scale2.value = 0.25;
+        scale2.value = SCALE_INIT;
         rotate2.value = { x: 0, y: 0, z: 0 };
         translate2.value = { x: 0, y: 0 };
         break;
       case 3:
-        scale3.value = 0.25;
+        scale3.value = SCALE_INIT;
         rotate3.value = { x: 0, y: 0, z: 0 };
         translate3.value = { x: 0, y: 0 };
         break;
@@ -84,13 +90,13 @@ export default function App() {
     const scaleTemp = (e.scale - scaleOrigin.value) * .01
     switch (activeGarden) {
       case 1:
-        scale1.value = clamp(scale1.value + scaleTemp, 0.1, 10.0);
+        scale1.value = clamp(scale1.value + scaleTemp, SCALE_MIN, SCALE_MAX);
         break;
       case 2:
-        scale2.value = clamp(scale2.value + scaleTemp, 0.1, 10.0);
+        scale2.value = clamp(scale2.value + scaleTemp, SCALE_MIN, SCALE_MAX);
         break;
       case 3:
-        scale3.value = clamp(scale3.value + scaleTemp, 0.1, 10.0);
+        scale3.value = clamp(scale3.value + scaleTemp, SCALE_MIN, SCALE_MAX);
         break;
     }
   }
@@ -197,37 +203,59 @@ function updateTranslate(e) {
   const gesture = Gesture.Simultaneous(pinchGesture, rotateGesture, panGesture);
 
   const updateModel = async (model) => {
+    let object;
 
-    const object = await loadOBJ(model);
+    let tempTypes = [...gardenTypes];
+    tempTypes[activeGarden - 1][0] = selectedModel
+    tempTypes[activeGarden - 1][1] = model.name;
+    setGardenTypes(tempTypes);
 
     switch (activeGarden) {
       case 1:
+        // modelGroup1.current.clear()
+        // modelGroup1.current.add(new THREE.Mesh(new THREE.geo, new THREE.MeshBasicMaterial({ color: 0x000000 })));
+        modelGroup1.current.add(new THREE.AmbientLight(0xffffff, 100000));
+
+        object = await loadOBJ(model);
         modelGroup1.current.clear()
         modelGroup1.current.add(object);
         // object.rotation.set(rotate1.value.x, rotate1.value.y, rotate1.value.z)
         object.position.set(translate1.value.x, translate1.value.y, 0)
         object.scale.set(scale1.value, scale1.value, scale1.value);
+        models.current.push(object);
+
+        
         
         break;
       case 2:
+        modelGroup2.current.add(new THREE.AmbientLight(0xffffff, 100000));
+
+        object = await loadOBJ(model);
         modelGroup2.current.clear()
         modelGroup2.current.add(object);
         // object.rotation.set(rotate2.value.x, rotate2.value.y, rotate2.value.z)
         object.position.set(translate2.value.x, translate2.value.y, 0)
         object.scale.set(scale2.value, scale2.value, scale2.value);
+        models.current.push(object);
         
         break;
       case 3:
+        // modelGroup3.current.add(new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: 0x000000 })));
+        // modelGroup3.current.clear()
+        modelGroup3.current.add(new THREE.AmbientLight(0xffffff, 100000));
+
+        object = await loadOBJ(model);
         modelGroup3.current.clear()
         modelGroup3.current.add(object);
         // object.rotation.set(rotate3.value.x, rotate3.value.y, rotate3.value.z)
         object.position.set(translate3.value.x, translate3.value.y, 0)
         object.scale.set(scale3.value, scale3.value, scale3.value);
+        models.current.push(object);
         
         break;
     }
     // object.add(new THREE.AmbientLight(0xffffff, 100000))
-    models.current.push(object);
+    
   }
   
   const loadOBJ = async (model) => {
@@ -287,7 +315,7 @@ function updateTranslate(e) {
   function checkObjects() {
     const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 
-    const s = clamp(scale1.value, 0.1, 10.0);
+    const s = clamp(scale1.value, SCALE_MIN, SCALE_MAX);
     const tx = clamp(translate1.value.x, -10, 10);
     const ty = clamp(translate1.value.y, -10, 10);
     const ry = isNaN(rotate1.value.y) ? 0 : rotate1.value.y;
@@ -297,7 +325,7 @@ function updateTranslate(e) {
     modelGroup1.current.rotation.set(rx, ry, rz); // or include X/Z
     modelGroup1.current.position.set(tx, ty, 0);
 
-    const s2 = clamp(scale2.value, 0.1, 10.0);
+    const s2 = clamp(scale2.value, SCALE_MIN, SCALE_MAX);
     const tx2 = clamp(translate2.value.x, -10, 10);
     const ty2 = clamp(translate2.value.y, -10, 10);
     const ry2 = isNaN(rotate2.value.y) ? 0 : rotate2.value.y;
@@ -307,7 +335,7 @@ function updateTranslate(e) {
     modelGroup2.current.rotation.set(rx2, ry2, rz2); // or include X/Z
     modelGroup2.current.position.set(tx2, ty2, 0);
 
-    const s3 = clamp(scale3.value, 0.1, 10.0);
+    const s3 = clamp(scale3.value, SCALE_MIN, SCALE_MAX);
     const tx3 = clamp(translate3.value.x, -10, 10);
     const ty3 = clamp(translate3.value.y, -10, 10);
     const ry3 = isNaN(rotate3.value.y) ? 0 : rotate3.value.y;
@@ -380,7 +408,7 @@ function updateTranslate(e) {
       requestAnimationFrame(render);
 
       checkObjects()
-      console.log("rendering scene: ", rotate1.value)
+      // console.log("rendering scene: ", rotate1.value)
       
       renderer.render(scene, camera);
       gl.endFrameEXP();
@@ -403,7 +431,9 @@ function updateTranslate(e) {
       pathname: '/4-Conditions',
       params: {
         image: image,
-        gardens: snapshot
+        gardens: snapshot,
+        types: gardenTypes.map((i) => i[0]).join(','),
+        models: gardenTypes.map((i) => i[1]).join(','),
       }
     });
   };
@@ -439,7 +469,7 @@ function updateTranslate(e) {
           {modelOptions.map(item => {
             if (item.name != "LowRider" && item.name != "HighRise") {
               return (
-              <ThemeView key={item.name} onTouchEnd={() => {}} style={ [item.name != selectedModel ? styles.model : styles.selectedModel, {opacity: 0.15}]}>
+              <ThemeView key={item.name} onTouchEnd={() => {}} style={ [item.name != selectedModel ? styles.model : styles.selectedModel, {opacity: 0.2}]}>
                 <Image source={item.image} style={styles.modelImage}></Image>
                 <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
                   {item.name}
@@ -471,7 +501,7 @@ function updateTranslate(e) {
             {colorPickerOptions.map(item => {
               if (item.name != "Raw Cedar" && item.name != "Silver Patina") {
                 return (
-                <ThemeView key={item.name} onTouchEnd={() => {}} style={[item.name != selectedColor ? styles.color : styles.selectedColor, {opacity: 0.15}]}>
+                <ThemeView key={item.name} onTouchEnd={() => {}} style={[item.name != selectedColor ? styles.color : styles.selectedColor, {opacity: 0.2}]}>
                   <Image source={item.image} style={styles.colorImage}></Image>
                 </ThemeView>
               );

@@ -15,7 +15,7 @@ const width = Dimensions.get("window").width;
 export default function HomeAllScreen() {
   const router = useRouter();
   console.log('HomeAllScreen');
-  const { image, gardens, plants } = useLocalSearchParams<{ image?: any; gardens?: any; plants?: any; }>();
+  const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; plants: any; }>();
   console.log('HomeAllScreen2');
   const carouselRef = useRef(null);
   const { width } = Dimensions.get('window');
