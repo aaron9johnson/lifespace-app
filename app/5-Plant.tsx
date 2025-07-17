@@ -81,7 +81,11 @@ class Draggable extends Component {
       //     showDraggable: false
       //   })
       // });
-    } 
+    } else {
+      console.log("draggsable return to original position...")
+      e.state.pan.setOffset({ x:0, y:0});
+      e.state.pan.setValue({ x:0, y:0});
+    }
   }
 
   render() {
@@ -275,19 +279,19 @@ export default function PlantScreen() {
                 <View style={[ drops[index][0].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][0].color  } ]}>
                   {drops[index][0].image ? <Image
                     source={drops[index][0].planting}
-                    style={{ width: 100, height: 100, backgroundColor: drops[index][0].color }}
+                    style={{ width: 94, height: 94, backgroundColor: drops[index][0].color }}
                   /> : <></>}
                 </View>
                 <View style={[ drops[index][1].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][1].color  }]}>
                   {drops[index][1].image ? <Image
                     source={drops[index][1].planting}
-                    style={{ width: 100, height: 100, backgroundColor: drops[index][1].color }}
+                    style={{ width: 94, height: 94, backgroundColor: drops[index][1].color }}
                   /> : <></>}
                 </View>
                 <View style={[ drops[index][2].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][2].color  }]}>
                   {drops[index][2].image ? <Image
                     source={drops[index][2].planting}
-                    style={{ width: 100, height: 100, backgroundColor: drops[index][2].color }}
+                    style={{ width: 94, height: 94, backgroundColor: drops[index][2].color }}
                   /> : <></>}
                 </View>
               </View>
@@ -317,13 +321,15 @@ export default function PlantScreen() {
               containerStyle={{ gap: 5, marginTop: 10 }}
               onPress={onPressPagination}
             />
+            {/* <ScrollView bounces={false} horizontal={true}> */}
         <View ref={addDragableRef} style={styles.row} key={plantRefreshKey}>
                 {plantData.filter((i) => i.seasons.includes(currentSeason(carouselInstanceRef.current?.getCurrentIndex() || 0) + "")).map((item, index) => (
-                  <View style={{ width: 100, height: 100, margin: 5 }}>
+                  <View style={{ width: 100, height: 100, margin: 5, zIndex: 9999 }}>
                     <Draggable dropped={checkDropped} plant={item}/>
                   </View>
                 ))}
               </View>
+              {/* </ScrollView> */}
         {confirm == true ? <ThemedView style={styles.ctaContainer}>
           <ThemeCTA onPress={confirmPlanting}>
             Confirm
@@ -447,7 +453,8 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderWidth: 3,
     borderColor: "#000000",
-    borderStyle: "dashed"
+    borderStyle: "dashed",
+    overflow: 'hidden',
   },
   dropZone1f: {
     height: 100,
@@ -455,7 +462,8 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     borderWidth: 3,
     borderColor: "#fff",
-    borderStyle: "dashed"
+    borderStyle: "dashed",
+    overflow: 'hidden',
   },
   dropZone2f: {
     height: 100,
@@ -463,7 +471,8 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     borderWidth: 3,
     borderColor: "#fff",
-    borderStyle: "dashed"
+    borderStyle: "dashed",
+    overflow: 'hidden',
   },
   dropZone3f: {
     height: 100,
@@ -471,7 +480,8 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     borderWidth: 3,
     borderColor: "#fff",
-    borderStyle: "dashed"
+    borderStyle: "dashed",
+    overflow: 'hidden',
   },
   dropZone2: {
     height: 100,
@@ -479,7 +489,8 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderWidth: 3,
     borderColor: "#000000",
-    borderStyle: "dashed"
+    borderStyle: "dashed",
+    overflow: 'hidden',
   },
   dropZone3: {
     height: 100,
@@ -487,7 +498,8 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderWidth: 3,
     borderColor: "#000000",
-    borderStyle: "dashed"
+    borderStyle: "dashed",
+    overflow: 'hidden',
   },
   text: {
     marginTop: 25,
