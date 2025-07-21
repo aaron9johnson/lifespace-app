@@ -1,21 +1,38 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps, TouchableOpacity, TextInput} from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, TextInput} from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemeView } from './aa/ThemeView';
 import { ThemeText } from './aa/ThemeText';
 import { ThemeCTA } from './aa/ThemeCTA';
 import Entypo from '@expo/vector-icons/Entypo';
+import { PlantLight, PlantZone, ZoneData, cityToZone } from './data/PlantData';
+
+const zoneData = ZoneData();
 
 export default function ConditionsScreen() {
   const router = useRouter();
   const { image, gardens, types, models } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; }>();
-  const [changingLocation, setChangingLocation] = useState(false);
-  const [text, setText] = useState('');
+  const [isChangingLocation, setIsChangingLocation] = useState(false);
+  const [inputText, setInputText] = useState('');
   const [cityText, setCityText] = useState('Vancouver BC');
+  const [plantZone, setPlantZone] = useState(PlantZone.ZONE_8);
 
-  const confirmPhoto = async () => {
-    console.log('confirmPhoto: ', image);
+  const checkCity = () => {
+    const city = inputText;
+    const info = cityToZone(city, zoneData);
+    if (info.zone != PlantZone.ZONE_0) {
+      setPlantZone(info.zone)
+      setCityText(city);
+      setIsChangingLocation(false);
+    } else {
+      // no city found
+      setCityText(city+"?");
+      setIsChangingLocation(false);
+    }
+  }
+  const confirmPhoto = (light: PlantLight) => {
+    const conditions = plantZone.toString() + ',' + light;
     router.push({ 
       pathname: '/5-Plant',
       params: {
@@ -23,94 +40,93 @@ export default function ConditionsScreen() {
         gardens: gardens,
         types: types,
         models: models,
-        conditions: 8 // zone 8
+        conditions: conditions
       }
     });
   };
   return (
     <View style={styles.container}>
       <ThemeView style={styles.imageContainer}>
-        {/* <Image source={image} style={styles.image}></Image> */}
-        {!changingLocation ? <Image source={image} style={styles.image}></Image> : <></>}
-        {!changingLocation ? <Image source={gardens} style={[styles.image, {backgroundColor: 'transparent' }]}></Image> : <></>}
-
+        
+        {!isChangingLocation ? <Image source={image} style={styles.image}></Image> : <></>}
+        {!isChangingLocation ? <Image source={gardens} style={[styles.image, { backgroundColor: 'transparent' }]}></Image> : <></>}
         
         <ThemeView style={styles.instructionContainer}>
-          <ThemeText style={styles.titleText}>What plants will thrive?</ThemeText>
+          <ThemeText style={styles.titleText}>
+            What plants will thrive?
+          </ThemeText>
         </ThemeView>
-
         <ThemeView style={styles.instructionContainerBottom}>
-          {changingLocation ? 
-            <View style={{ marginTop: -450}}>
+
+          {isChangingLocation ?
+            <View style={{ marginTop: -450 }}>
               <ThemeText style={styles.instructionText}>Enter your City</ThemeText>
-              
               <TextInput
                 style={styles.input}
                 placeholder="Enter city here"
-                onChangeText={newText => setText(newText)}
-                value={text}
+                onChangeText={setInputText}
+                value={inputText}
               />
-
               <ThemeView style={styles.ctaWrapper2}>
-                {text.length > 0 ?
-                  <ThemeCTA type='primary' onPress={() => {
-                      setCityText(text);
-                      setChangingLocation(false);
-                    }}>
+
+                {inputText.length > 0 ?
+                  <ThemeCTA type='primary' onPress={checkCity}>
                     Check Zone
                   </ThemeCTA>
                 :
-                  <ThemeCTA type='secondary' onPress={() => {
-                      setChangingLocation(false);
-                    }}>
+                  <ThemeCTA type='secondary' onPress={() => setIsChangingLocation(false)}>
                     Back
                   </ThemeCTA>
                 }
+
               </ThemeView>
+
             </View>
           :
+          // isChangingLocation == false
             <>
-              <ThemeText style={styles.instructionText}>Location: <ThemeText style={[styles.instructionText, {fontFamily: 'LatoBold'}]}>{cityText}</ThemeText></ThemeText>
-              <ThemeView style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent'}}>
-                <ThemeText style={styles.instructionText}>Zone: <ThemeText style={[styles.instructionText, {fontFamily: 'LatoBold'}]}>8</ThemeText></ThemeText>
+              <ThemeText style={styles.instructionText}>
+                Location: <ThemeText style={[styles.instructionText, { fontFamily: 'LatoBold' }]}>{ cityText }</ThemeText>
+              </ThemeText>
 
-                <ThemeView style={[styles.ctaWrapper2, {maxWidth: 115, height: 32, margin: 0, padding: 0, marginTop: -8}]}>
-                  <ThemeCTA style={{maxWidth: 115, height: 32, margin: 0, padding: 0 }} type='borderless' onPress={() => {
-                    setText('');
-                    setChangingLocation(true);
+              <ThemeView style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent'}}>
+                <ThemeText style={styles.instructionText}>
+                  Zone: <ThemeText style={[styles.instructionText, { fontFamily: 'LatoBold' }]}>{ plantZone.toString() }</ThemeText>
+                </ThemeText>
+                <ThemeView style={[styles.ctaWrapper2, { maxWidth: 115, height: 32, margin: 0, padding: 0, marginTop: -8 }]}>
+                  <ThemeCTA style={{ maxWidth: 115, height: 32, margin: 0, padding: 0 }} type='borderless' onPress={() => {
+                    setInputText('');
+                    setIsChangingLocation(true);
                   }}>
                     Change
                   </ThemeCTA>
                 </ThemeView>
               </ThemeView>
               
-              <ThemeText style={[styles.instructionText,{marginTop: 20, marginBottom: 20}]}>What level of light is the garden in?</ThemeText>
+              <ThemeText style={[styles.instructionText,{ marginTop: 20, marginBottom: 20 }]}>
+                What level of light is the garden in?
+              </ThemeText>
+
               <ThemeView style={styles.ctaWrapper2}>
-                <ThemeCTA type='secondary' onPress={() => {
-                    confirmPhoto(); // Call the takePhoto function
-                  }}>
+                <ThemeCTA type='secondary' onPress={() => confirmPhoto(PlantLight.FULL_SUN)}>
                   Full Sun
-                  <View style={{ width: 20}}></View>
+                  <View style={{ width: 20 }}></View>
                   <Entypo name="light-up" size={24} color="black" />
                 </ThemeCTA>
               </ThemeView>
 
               <ThemeView style={styles.ctaWrapper2}>
-                <ThemeCTA type='secondary' onPress={() => {
-                    confirmPhoto(); // Call the takePhoto function
-                  }}>
+                <ThemeCTA type='secondary' onPress={() => confirmPhoto(PlantLight.PART_SUN)}>
                   Part Sun
-                  <View style={{ width: 20}}></View>
+                  <View style={{ width: 20 }}></View>
                   <Entypo name="adjust" size={24} color="black" />
                 </ThemeCTA>
               </ThemeView>
 
               <ThemeView style={styles.ctaWrapper2}>
-                <ThemeCTA type='secondary' onPress={() => {
-                    confirmPhoto(); // Call the takePhoto function
-                  }}>
+                <ThemeCTA type='secondary' onPress={() => confirmPhoto(PlantLight.FULL_SHADE)}>
                   No Sun
-                  <View style={{ width: 20}}></View>
+                  <View style={{ width: 20 }}></View>
                   <Entypo name="cloud" size={24} color="black" />
                 </ThemeCTA>
               </ThemeView>
@@ -127,9 +143,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Lato',
     fontSize: 32,
     textAlign: 'center',
-    // textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    // textShadowOffset: {width: -1, height: 1},
-    // textShadowRadius: 10,
     lineHeight: 32,
     height: 50,
     width: 300,
@@ -142,34 +155,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: 'white',
   },
-  errorContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 200,
-    width: '100%',
-    padding: 20
-
-  },
-  errorText: {
-    fontFamily: 'LatoItalic',
-    fontSize: 32,
-    textAlign: 'center',
-    lineHeight: 32,
-    marginBottom: 24,
-  },
-  errorTextSmall: {
-    fontFamily: 'LatoThinItalic',
-    fontSize: 32,
-    textAlign: 'center',
-    lineHeight: 32,
-  },
   instructionText:{
     fontFamily: 'LatoItalic',
     fontSize: 32,
     textAlign: 'center',
-    // textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    // textShadowOffset: {width: -1, height: 1},
-    // textShadowRadius: 10,
     lineHeight: 32,
     color: '#595959',
   },
@@ -177,35 +166,26 @@ const styles = StyleSheet.create({
     fontFamily: 'LatoItalic',
     fontSize: 32,
     textAlign: 'center',
-    // textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    // textShadowOffset: {width: -1, height: 1},
-    // textShadowRadius: 10,
     lineHeight: 32,
     color: '#595959',
   },
   instructionContainer: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     top: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     backgroundColor: 'transparent',
     left: 20,
     right: 20,
     borderRadius: 20,
   },
   instructionContainerBottom: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     bottom: 275,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     left: 20,
     right: 20,
     borderRadius: 20,
@@ -215,34 +195,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'white',
-  },
-  cameraContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    width: '100%',
-  },
-  buttonCamera: {
-    position: 'absolute',
-    bottom: 40,
-    padding: 10,
-    backgroundColor: 'transparent',
-    borderRadius: 37,
-    borderWidth: 6,
-    borderColor: '#ffffff',
-    width: 75,
-    height: 75,
-  },
-  buttonCameraPhoto: {
-    position: 'absolute',
-    bottom: 40,
-    padding: 10,
-    backgroundColor: 'transparent',
-    borderRadius: 37,
-    borderColor: '#ffffff',
-    width: 75,
-    height: 75,
-    borderWidth: 0,
   },
   imageContainer: {
     justifyContent: 'center',
@@ -258,47 +210,9 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     backgroundColor: 'white',
-
-  },
-  imageOld:{
-    marginTop: -300,
-    marginBottom: 50,
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    position: 'absolute',
-    backgroundColor: 'transparent',
-    // backgroundColor: 'grey', // transparent
-    objectFit: 'contain',
-    // borderRadius: 25,
-    borderWidth: 0,
-    // width: 300,
-    // height: 300,
-    // backgroundColor: 'white',
-  },
-  ctaContainer: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    width: '100%',
-    flexDirection: 'column-reverse',
-    rowGap: 10,
-    height: 165,
-    padding: 10,
-    backgroundColor: 'transparent',
-    
-    alignContent: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  ctaWrapper: {
-    backgroundColor: 'transparent'
-    
   },
   ctaWrapper2: {
     backgroundColor: 'transparent',
     marginTop: 10,
-
   },
 });

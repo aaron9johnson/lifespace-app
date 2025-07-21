@@ -1,69 +1,61 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Button, FlatList, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Asset } from 'expo-asset';
 import * as THREE from 'three';
-import {
-  GestureDetector,
-  Gesture,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
-import Animated, { useSharedValue, runOnJS } from 'react-native-reanimated';
+import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSharedValue, runOnJS } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-
 import { ThemeView } from './aa/ThemeView';
 import { ThemeText } from './aa/ThemeText';
 import { ThemeCTA } from './aa/ThemeCTA';
-
-import Data from './data'
 import { ExpoWebGLRenderingContext, GLView } from 'expo-gl';
-import ExpoTHREE, { loadAsync, Renderer, TextureLoader } from 'expo-three';
+import ExpoTHREE, { Renderer } from 'expo-three';
+
+import GardenData, { Garden, GardenColor, GardenBuy } from './data/GardenData'
+const gardenData: Array<Garden> = GardenData();
+// import PlantData, { Plant, PlantInfo } from './data/PlantData'
+// const plantData: Array<Plant> = PlantData();
 
 export default function App() {
-
   const SCALE_MIN = 0.1;
   const SCALE_MAX = 1.0;
   const SCALE_INIT = 0.2;
-  
+
   const glViewRef = useRef(null);
-  const [colorPickerOptions, setColorPickerOptions] = useState(Data().gardens[0].colors)
-  const [modelOptions, setModelOptions] = useState(Data().gardens)
   const { image } = useLocalSearchParams<{ image: any; }>();
   const router = useRouter();
 
-  const [capturedImageUri, setCapturedImageUri] = useState(null);
-
-  const [isRotating, setIsRotating] = useState(true)
-
-  const sceneRef = useRef(null);
-
-  const models = useRef([]);
   const modelGroup1 = useRef(new THREE.Group());
   const modelGroup2 = useRef(new THREE.Group());
   const modelGroup3 = useRef(new THREE.Group());
-
   const scaleOrigin = useSharedValue(SCALE_INIT);
   const translateOrigin = useSharedValue({ x: 0, y: 0 });
-
   const scale1 = useSharedValue(SCALE_INIT);
   const rotate1 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate1 = useSharedValue({ x: 0, y: 0 });
-
   const scale2 = useSharedValue(SCALE_INIT);
   const rotate2 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate2 = useSharedValue({ x: 0, y: 0 });
-
   const scale3 = useSharedValue(SCALE_INIT);
   const rotate3 = useSharedValue({ x: 0, y: 0, z: 0 });
   const translate3 = useSharedValue({ x: 0, y: 0 });
 
+  const [confirmingDesign, setConfirmingDesign] = useState(false);
+  const [isRotating, setIsRotating] = useState(true)
+  const [modelCount, setModelCount] = useState(0);
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(true);
+  const [colorPickerOptions, setColorPickerOptions] = useState(gardenData[0].colors)
+  const [selectedModel, setSelectedModel] = useState('LowRider');
+  const [selectedColor, setSelectedColor] = useState('Raw Cedar');
+  const [activeGarden, setActiveGarden] = useState(0);
 
-  const [selectedModel, setSelectedModel] = useState('LowRider')
-  const [selectedColor, setSelectedColor] = useState('Raw Cedar')
-  const [activeGarden, setActiveGarden] = useState(0)
-  const [colorPickerOpen, setColorPickerOpen] = useState(true)
+  const [gardenTypes, setGardenTypes] = useState([['LowRider', 'Raw Cedar'], [], []]);
 
-  const [gardenTypes, setGardenTypes] = useState([['LowRider', 'Raw Cedar'], [], []])
+  const clamp = (val: number, min: number, max: number): number => {
+    'worklet'; // ui thread error fix
+    return Math.max(min, Math.min(max, val));
+  }
 
   const resetTransform = () => {
     switch (activeGarden) {
@@ -86,7 +78,6 @@ export default function App() {
   };
 
   function updateScale(e) {
-    const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
     const scaleTemp = (e.scale - scaleOrigin.value) * .01
     switch (activeGarden) {
       case 1:
@@ -103,11 +94,11 @@ export default function App() {
 
   const pinchGesture = Gesture.Pinch().onStart((e) => {
     scaleOrigin.value = e.scale
-    runOnJS(setColorPickerOpen)(false)
+    runOnJS(setIsColorPickerOpen)(false)
   }).onUpdate(updateScale).onEnd(updateScale);
 
   const rotateGesture = Gesture.Rotation().onUpdate((e) => {
-    runOnJS(setColorPickerOpen)(false)
+    runOnJS(setIsColorPickerOpen)(false)
     console.log("rotate")
     switch (activeGarden) {
       case 1:
@@ -176,7 +167,7 @@ function updateTranslate(e) {
 }
   const panGesture = Gesture.Pan().minDistance(1)
     .onStart((e) => {
-      runOnJS(setColorPickerOpen)(false)
+      runOnJS(setIsColorPickerOpen)(false)
       switch (activeGarden) {
         case 1:
           translateOrigin.value = {
@@ -202,80 +193,56 @@ function updateTranslate(e) {
 
   const gesture = Gesture.Simultaneous(pinchGesture, rotateGesture, panGesture);
 
-  const updateModel = async (model) => {
-    let object;
-
+  const updateModel = async (model: GardenColor) => {
     let tempTypes = [...gardenTypes];
     tempTypes[activeGarden - 1][0] = selectedModel
     tempTypes[activeGarden - 1][1] = model.name;
     setGardenTypes(tempTypes);
 
-    switch (activeGarden) {
-      case 1:
-        // modelGroup1.current.clear()
-        // modelGroup1.current.add(new THREE.Mesh(new THREE.geo, new THREE.MeshBasicMaterial({ color: 0x000000 })));
-        modelGroup1.current.add(new THREE.AmbientLight(0xffffff, 100000));
-
-        object = await loadOBJ(model);
-        modelGroup1.current.clear()
-        modelGroup1.current.add(object);
-        // object.rotation.set(rotate1.value.x, rotate1.value.y, rotate1.value.z)
-        object.position.set(translate1.value.x, translate1.value.y, 0)
-        object.scale.set(scale1.value, scale1.value, scale1.value);
-        models.current.push(object);
-
-        
-        
-        break;
+    let group: THREE.Group;
+    // let translate: any;
+    // let scale: any;
+    switch(activeGarden) {
       case 2:
-        modelGroup2.current.add(new THREE.AmbientLight(0xffffff, 100000));
-
-        object = await loadOBJ(model);
-        modelGroup2.current.clear()
-        modelGroup2.current.add(object);
-        // object.rotation.set(rotate2.value.x, rotate2.value.y, rotate2.value.z)
-        object.position.set(translate2.value.x, translate2.value.y, 0)
-        object.scale.set(scale2.value, scale2.value, scale2.value);
-        models.current.push(object);
-        
+        group = modelGroup2.current;
+        // translate = translate2.value;
+        // scale = scale2.value;
         break;
       case 3:
-        // modelGroup3.current.add(new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: 0x000000 })));
-        // modelGroup3.current.clear()
-        modelGroup3.current.add(new THREE.AmbientLight(0xffffff, 100000));
-
-        object = await loadOBJ(model);
-        modelGroup3.current.clear()
-        modelGroup3.current.add(object);
-        // object.rotation.set(rotate3.value.x, rotate3.value.y, rotate3.value.z)
-        object.position.set(translate3.value.x, translate3.value.y, 0)
-        object.scale.set(scale3.value, scale3.value, scale3.value);
-        models.current.push(object);
-        
+        group = modelGroup3.current;
+        // translate = translate3.value;
+        // scale = scale3.value;
+        break;
+      default:
+        group = modelGroup1.current;
+        // translate = translate1.value;
+        // scale = scale1.value;
         break;
     }
-    // object.add(new THREE.AmbientLight(0xffffff, 100000))
-    
+    group.add(new THREE.AmbientLight(0xffffff, 100000)); // whiteout
+
+    let object = await loadOBJ(model);
+    group.clear()
+    group.add(object);
+
+    // object.position.set(translate.x, translate.y, 0)
+    // object.scale.set(scale, scale, scale);
   }
   
-  const loadOBJ = async (model) => {
+  const loadOBJ = async (model: GardenColor): Promise<THREE.Object3D> => {
     console.log("loadOBJ: ", model)
     const obj = await ExpoTHREE.loadDaeAsync({
       asset: model.dae,
-      onAssetRequested: (m) => {
-        console.log("onAssetRequested: ", m)
-        return Asset.fromModule(model.daeImages[m]).downloadAsync();
-      },
-      onProgress: () => {
-        console.log("onProgress")
-      }
+      onAssetRequested: (m: string) => Asset.fromModule(model.daeImages[m]).downloadAsync(),
+      onProgress: () => {}
     });
     return obj.scene;
   }
 
-  const loadModel = async (model) => {
-    setColorPickerOpen(true)
-    if (models.current.length >= 3) {
+  const loadModel = async (model: GardenColor) => {
+    setIsColorPickerOpen(true);
+
+    if (modelCount >= 3) {
       setActiveGarden(activeGarden % 3 + 1)
       return;
     }
@@ -283,38 +250,34 @@ function updateTranslate(e) {
     const object = await loadOBJ(model);
 
     switch (activeGarden) {
-    case 0:
-      setActiveGarden(1)
-      object.scale.set(scale1.value, scale1.value, scale1.value);
-      modelGroup1.current.add(object);
-      break;
-    case 1:
-      setActiveGarden(2)
-      object.scale.set(scale2.value, scale2.value, scale2.value);
-      modelGroup2.current.add(object);
-      break;
-    case 2:
-      setActiveGarden(3)
-      object.scale.set(scale3.value, scale3.value, scale3.value);
-      modelGroup3.current.add(object);
-      break;
-    case 3:
-      setActiveGarden(1)
-      break;
-  }
+      case 0:
+        setActiveGarden(1);
+        modelGroup1.current.add(object);
+        // object.scale.set(scale1.value, scale1.value, scale1.value);
+        break;
+      case 1:
+        setActiveGarden(2);
+        modelGroup2.current.add(object);
+        // object.scale.set(scale2.value, scale2.value, scale2.value);
+        break;
+      case 2:
+        setActiveGarden(3);
+        modelGroup3.current.add(object);
+        // object.scale.set(scale3.value, scale3.value, scale3.value);
+        break;
+      default:
+        break;
+    }
 
     const box = new THREE.Box3().setFromObject(object);
     const center = new THREE.Vector3();
     box.getCenter(center);
     object.position.sub(center); // move geometry to center
-
-    // object.add(new THREE.AmbientLight(0xffffff, 100000))
-    models.current.push(object);
+    
+    setModelCount(modelCount + 1);
   };
-
-  function checkObjects() {
-    const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
-
+  
+  const updateObjects = () => {
     const s = clamp(scale1.value, SCALE_MIN, SCALE_MAX);
     const tx = clamp(translate1.value.x, -10, 10);
     const ty = clamp(translate1.value.y, -10, 10);
@@ -345,119 +308,97 @@ function updateTranslate(e) {
     modelGroup3.current.rotation.set(rx3, ry3, rz3); // or include X/Z
     modelGroup3.current.position.set(tx3, ty3, 0);
   }
+
   const onContextCreate = async (gl: ExpoWebGLRenderingContext) => {
-    // removes the warning EXGL: gl.pixelStorei() doesn't support this parameter yet!
-    const pixelStorei = gl.pixelStorei.bind(gl);
-    gl.pixelStorei = function (...args) {
-      const [parameter] = args;
-      switch (parameter) {
-        case gl.UNPACK_FLIP_Y_WEBGL:
-          return pixelStorei(...args);
-      }
-    };
+    const pixelStorei = gl.pixelStorei.bind(gl); // removes the warning EXGL: gl.pixelStorei() doesn't support this parameter yet!
+    gl.pixelStorei = function(...args){const [parameter]=args;switch(parameter){case gl.UNPACK_FLIP_Y_WEBGL:return pixelStorei(...args)}};
 
+    // Setup
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
-    const scene = new THREE.Scene();
-
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 100);
     camera.position.z = 5;
-
-    sceneRef.current = scene;
-
     const renderer = new Renderer({ gl });
     renderer.setSize(width, height);
 
+    const scene = new THREE.Scene();
+    scene.add(modelGroup1.current);
+    scene.add(modelGroup2.current);
+    scene.add(modelGroup3.current);
+
+    // Lighting
     const hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
     hemiLight.color.setHSL( 0.6, 0.75, 0.5 );
     hemiLight.groundColor.setHSL( 0.095, 0.5, 0.5 );
     hemiLight.position.set( 0, 500, 0 );
-    scene.add( hemiLight );
-
+    scene.add(hemiLight);
     const dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
     dirLight.position.set( -1, 0.75, 1 );
     dirLight.position.multiplyScalar( 50);
     dirLight.name = "dirlight";
-    scene.add( dirLight );
-
+    scene.add(dirLight);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = dirLight.shadow.mapSize.height = 1024*2;
-
     const d = 300;
     dirLight.shadow.camera.left = -d;
     dirLight.shadow.camera.right = d;
     dirLight.shadow.camera.top = d;
     dirLight.shadow.camera.bottom = -d;
-
     dirLight.shadow.camera.far = 3500;
     dirLight.shadow.bias = -0.0001;
     dirLight.shadow.intensity = 0.35;
+    const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1); // HemisphereLight - color feels nicer
+    scene.add(hemisphereLight);
 
-    // HemisphereLight - color feels nicer
-    const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1)
-    scene.add(hemisphereLight)
-    modelGroup1.current.add(hemisphereLight)
+     // Load initial model
+    await loadModel(gardenData[0].colors[0]);
 
-    scene.add(modelGroup1.current);
-    scene.add(modelGroup2.current);
-    scene.add(modelGroup3.current);
-
-    await loadModel(Data().gardens[0].colors[0]); // Load initial model
-
+    // Render Loop
     const render = () => {
-      
       requestAnimationFrame(render);
-
-      checkObjects()
-      // console.log("rendering scene: ", rotate1.value)
-      
+      updateObjects();
       renderer.render(scene, camera);
       gl.endFrameEXP();
     };
-
     render();
   };
 
-  const selectRotate = () => {
-    setIsRotating(true)
+  const confirmDesign = () => {
+    if (confirmingDesign) return;
+    setConfirmingDesign(true);
+    snapshotDesign();
   }
-  const selectRoll = () => {
-    setIsRotating(false)
-  }
-
-  const confirmDesign = async () => {
-    const snapshot = await handleGLSnapshot()
-    console.log('confirmDesign: ', image);
-    router.push({ 
-      pathname: '/4-Conditions',
-      params: {
-        image: image,
-        gardens: snapshot,
-        types: gardenTypes.map((i) => i[0]).join(','),
-        models: gardenTypes.map((i) => i[1]).join(','),
-      }
-    });
+  const snapshotDesign = async () => {
+    const snapshot = await handleGLSnapshot();
+    if (snapshot != '') {
+      router.push({ 
+        pathname: '/4-Conditions',
+        params: {
+          image: image,
+          gardens: snapshot,
+          types: gardenTypes.map((i) => i[0]).join(','),
+          models: gardenTypes.map((i) => i[1]).join(','),
+        }
+      });
+    }
+    setConfirmingDesign(false);
   };
-
-  const handleGLSnapshot = async () => {
-    let u = ''
+  const handleGLSnapshot = async (): Promise<string> => {
     if (glViewRef.current) {
       try {
-        const snapshot = await glViewRef.current.takeSnapshotAsync({
-          format: 'png',
-        });
-        setCapturedImageUri(snapshot.uri);
-        console.log('Snapshot taken:', snapshot.uri);
-        u = snapshot.uri
+        const snapshot = await glViewRef.current.takeSnapshotAsync({ format: 'png' });
+        return snapshot.uri;
       } catch (error) {
         console.error('Error taking snapshot:', error);
       }
     }
-    return u
+    return '';
   };
 
   return (
     <GestureHandlerRootView style={{ flex: 1, position: 'relative'}}>
+
       <Image source={image} style={styles.image}></Image>
+
       <GestureDetector gesture={gesture}>
         <View style={styles.container}>
           <GLView ref={glViewRef} style={styles.glview} onContextCreate={onContextCreate} />
@@ -466,77 +407,59 @@ function updateTranslate(e) {
 
       <ThemeView style={styles.modelPicker}>
         <ScrollView horizontal={true} >
-          {modelOptions.map(item => {
-            if (item.name != "LowRider" && item.name != "HighRise") {
-              return (
-              <ThemeView key={item.name} onTouchEnd={() => {}} style={ [item.name != selectedModel ? styles.model : styles.selectedModel, {opacity: 0.2}]}>
-                <Image source={item.image} style={styles.modelImage}></Image>
-                <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
-                  {item.name}
-                </ThemeText>
-              </ThemeView>
-            );
-            }
-            return (
-              <ThemeView key={item.name} onTouchEnd={() => {
-                setColorPickerOpen(true);
-                setSelectedModel(item.name);
-                updateModel(item.colors[0]);
-                setColorPickerOptions(item.colors);
-                setSelectedColor(item.colors[0].name);
-              }} style={ item.name != selectedModel ? styles.model : styles.selectedModel }>
-                <Image source={item.image} style={styles.modelImage}></Image>
-                <ThemeText style={item.name != selectedModel ? styles.modelText : styles.selectedModelText}>
-                  {item.name}
-                </ThemeText>
-              </ThemeView>
-            );
-          })}
+          {gardenData.map(garden =>
+            <ThemeView key={garden.name} style={ garden.name != selectedModel ? styles.model : styles.selectedModel } onTouchEnd={() => {
+              setColorPickerOptions(garden.colors);
+              setIsColorPickerOpen(true);
+              setSelectedModel(garden.name);
+              setSelectedColor(garden.colors[0].name);
+              updateModel(garden.colors[0]);
+            }}>
+              <Image source={garden.image} style={styles.modelImage}></Image>
+              <ThemeText style={garden.name != selectedModel ? styles.modelText : styles.selectedModelText}>
+                { garden.name }
+              </ThemeText>
+            </ThemeView>
+          )}
         </ScrollView>
       </ThemeView>
 
-      {colorPickerOpen ?
+      {isColorPickerOpen ?
         <ThemeView style={styles.colorPicker}>
-          <ScrollView horizontal={true} >
-            {colorPickerOptions.map(item => {
-              if (item.name != "Raw Cedar" && item.name != "Silver Patina") {
-                return (
-                <ThemeView key={item.name} onTouchEnd={() => {}} style={[item.name != selectedColor ? styles.color : styles.selectedColor, {opacity: 0.2}]}>
-                  <Image source={item.image} style={styles.colorImage}></Image>
-                </ThemeView>
-              );
-              }
-              return (
-                <ThemeView key={item.name} onTouchEnd={() => {setSelectedColor(item.name);
-                  updateModel(item);
-                }} style={item.name != selectedColor ? styles.color : styles.selectedColor }>
-                  <Image source={item.image} style={styles.colorImage}></Image>
-                </ThemeView>
-              );
-            })}
+          <ScrollView horizontal={true}>
+            {colorPickerOptions.map(colorOption => 
+              <ThemeView key={colorOption.name} style={colorOption.name != selectedColor ? styles.color : styles.selectedColor } onTouchEnd={() => {
+                setSelectedColor(colorOption.name);
+                updateModel(colorOption);
+              }}>
+                <Image source={colorOption.image} style={styles.colorImage}></Image>
+              </ThemeView>
+            )}
           </ScrollView>
         </ThemeView>
       :<></>}
 
-      <ThemeView style={colorPickerOpen ? styles.instructionContainer : styles.instructionContainerNoColor}>
-        <ThemeText style={styles.instructionText}>{colorPickerOpen ? 'Select Garden And Finish' : 'Position Garden'}</ThemeText>
+      <ThemeView style={isColorPickerOpen ? styles.instructionContainer : styles.instructionContainerNoColor}>
+        <ThemeText style={styles.instructionText}>
+          { isColorPickerOpen ? 'Select Garden And Finish' : 'Position Garden' }
+        </ThemeText>
       </ThemeView>
 
       <ThemeView style={styles.instructionContainerBottom}>
-        <ThemeText style={styles.instructionText}>Drag to move garden. Use two fingers to scale and {!isRotating ? 'roll' : 'rotate'}.</ThemeText>
+        <ThemeText style={styles.instructionText}>
+          Drag to move garden. Use two fingers to scale and {!isRotating ? 'roll' : 'rotate'}.
+        </ThemeText>
       </ThemeView>
 
       <ThemeView style={styles.buttons}>
         <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={resetTransform}>
           Reset Position
         </ThemeCTA>
-        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={() => {
-          loadModel(Data().gardens[0].colors[0]);
-          }}>
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={() => loadModel(gardenData[0].colors[0])}>
           Add Garden
         </ThemeCTA>
-        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={isRotating ? selectRoll : selectRotate}>
-          {isRotating ? 'Roll Mode' : 'Rotate Mode'}
+        <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='secondary' onPress={() => isRotating ? setIsRotating(false) : setIsRotating(true)}>
+          { isRotating ? 'Roll Mode' : 'Rotate Mode' }
         </ThemeCTA>
         <ThemeCTA style={styles.button} textstyle={styles.buttonText} type='primary' onPress={confirmDesign} >
           Done
@@ -554,14 +477,13 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   },
   buttonText: {
     fontSize: 18,
     lineHeight: 18,
     textAlign: 'center',
-    textAlignVertical: 'center'
-
+    textAlignVertical: 'center',
   },
   button: {
     maxWidth: 95,
@@ -570,17 +492,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     height: 60,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   instructionContainerBottom: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     bottom: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     left: 20,
     right: 20,
     borderRadius: 20,
@@ -596,28 +515,22 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   instructionContainer: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     top: 125,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     backgroundColor: 'transparent',
     left: 20,
     right: 20,
     borderRadius: 20,
   },
   instructionContainerNoColor: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     top: 75,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     backgroundColor: 'transparent',
     left: 20,
     right: 20,
@@ -630,7 +543,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     height: 50,
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   },
   color: {
     width: 45,
@@ -641,7 +554,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginLeft: 20,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   selectedColor: {
     width: 45,
@@ -652,7 +565,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginLeft: 20,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   colorImage: {
     width: 40,
@@ -668,8 +581,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginLeft: 20,
     alignItems: 'center',
-    justifyContent: 'center'
-
+    justifyContent: 'center',
   },
   selectedModel: {
     width: 80,
@@ -680,24 +592,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     marginLeft: 20,
     alignItems: 'center',
-    justifyContent: 'center'
-
+    justifyContent: 'center',
   },
   modelImage: {
     width: 60,
     height: 60,
     objectFit: 'contain',
-
   },
   modelText: {
     fontFamily: 'Lato',
-    textAlign: 'center'
-
+    textAlign: 'center',
   },
   selectedModelText: {
     fontFamily: 'Lato',
     textAlign: 'center',
-
   },
   modelPicker: {
     position: 'absolute',
@@ -706,8 +614,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     height: 90,
-    backgroundColor: 'transparent'
-
+    backgroundColor: 'transparent',
   },
   image: {
     top: 0,
@@ -715,21 +622,20 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     position: 'absolute',
-    backgroundColor: 'grey', // transparent
+    backgroundColor: 'grey',
     objectFit: 'contain',
-    // borderRadius: 25,
     borderWidth: 0,
   },
   container: {
     flex:1,
     width: '100%',
     height: '100%',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   },
   glview: {
     flex:1,
     width: '100%',
     height: '100%',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   },
 });

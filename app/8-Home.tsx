@@ -1,57 +1,37 @@
 import { useRef } from 'react';
 import { Image } from 'expo-image';
-import { View, Dimensions, Button, Platform, StyleSheet, Text, TouchableOpacity, ViewComponent } from 'react-native';
+import { View, Dimensions, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { ThemeView } from '@/app/aa/ThemeView';
-import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSharedValue } from "react-native-reanimated";
-import Carousel, {
-  ICarouselInstance,
-  Pagination,
-} from "react-native-reanimated-carousel";
-
-const data = [...new Array(6).keys()];
-const width = Dimensions.get("window").width;
+import Carousel, { ICarouselInstance, Pagination } from "react-native-reanimated-carousel";
 
 export default function HomeAllScreen() {
   const router = useRouter();
-  console.log('HomeAllScreen');
   const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; plants: any; }>();
-  console.log('HomeAllScreen2');
-  const carouselRef = useRef(null);
-  const { width } = Dimensions.get('window');
-
-  const data = [
-    { title: 'Item 1', color: 'red' },
-    { title: 'Item 2', color: 'blue' },
-    { title: 'Item 3', color: 'green' },
-  ];
   const ref = useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
+  const data = [1,2,3]
   
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
-      /**
-       * Calculate the difference between the current index and the target index
-       * to ensure that the carousel scrolls to the nearest index
-       */
-      count: index - progress.value,
+      count: index - progress.value, // Calculate the difference between the current index and the target index to ensure that the carousel scrolls to the nearest index
       animated: true,
     });
   };
+
   return (
     <ThemeView style={styles.screen}>
         <ThemeView  style={{ backgroundColor: 'white'}}>
           <View>
             <Carousel
               ref={ref}
-              width={width}
+              width={Dimensions.get('window').width}
               height={400}
               data={data}
               onProgressChange={progress}
               renderItem={({ index }) => (
-                <View
-                  style={{ width: '100%', height: '100%'}}
-                >
+                <View style={{ width: '100%', height: '100%'}}>
                   <ThemeView style={{
                     borderWidth: 1,
                     backgroundColor: 'white',
@@ -81,10 +61,7 @@ export default function HomeAllScreen() {
           </View>
         </ThemeView>
       <ThemeView style={styles.ctaWrapper}>
-        <TouchableOpacity style={styles.cta} onPress={() => {
-          // router.dismissAll()
-          router.replace('/1-Home')
-        }}>
+        <TouchableOpacity style={styles.cta} onPress={() => router.replace('/1-Home')}>
           <Text style={styles.ctaText}>Restart</Text>
         </TouchableOpacity>
       </ThemeView>

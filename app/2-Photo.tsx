@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, View, StyleSheet, TouchableWithoutFeedback, type TextProps, TouchableOpacity} from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Camera, useCameraPermission, getCameraDevice } from 'react-native-vision-camera';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,15 @@ import { ThemeText } from './aa/ThemeText';
 import { ThemeCTA } from './aa/ThemeCTA';
 
 export default function PhotoScreen() {
+  const router = useRouter();
+  const cameraRef = useRef(null);
+  const { hasPermission, requestPermission } = useCameraPermission()
+  const devices = Camera.getAvailableCameraDevices();
+  const device = getCameraDevice(devices, 'back', {
+    physicalDevices: ['wide-angle-camera']
+  })
+  const [image, setImage] = useState(null);
+  const [isTakingPhoto, setIsTakingPhoto] = useState(true);
 
   const errorScreen = () => {
     return (
@@ -24,21 +33,17 @@ export default function PhotoScreen() {
   if (!Camera.getAvailableCameraDevices) {
     return errorScreen();
   }
-  const router = useRouter();
-  const cameraRef = useRef(null);
-  const [image, setImage] = useState(null);
-  const { hasPermission, requestPermission } = useCameraPermission()
-  const devices = Camera.getAvailableCameraDevices();
-  const device = getCameraDevice(devices, 'back', {
-    physicalDevices: ['wide-angle-camera']
-  })
-  const [takingPhoto, setTakingPhoto] = useState(true);
 
   if (!hasPermission) {
     requestPermission();
     return errorScreen();
   }
   
+  const capturePressed = () => {
+    if (!isTakingPhoto) return;
+    setIsTakingPhoto(false);
+    takePhoto();
+  }
   const takePhoto = async () => {
     try {
       const photo = await cameraRef.current.takePhoto({
@@ -50,10 +55,9 @@ export default function PhotoScreen() {
     } catch (err) {
       console.log('err: ', err);
     }
-  };
+  }
 
-  const confirmPhoto = async () => {
-    console.log('confirmPhoto: ', image);
+  const confirmPhoto = () => {
     router.push({ 
       pathname: '/3-Design',
       params: {
@@ -64,64 +68,59 @@ export default function PhotoScreen() {
   
   const renderCamera = () => {
     return (
-      <ThemeView style={styles.cameraContainer}>
-        
-        <Camera
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          device={device}
-          isActive={true}
-          photo={true}
-        />
-        <ThemeView style={ takingPhoto ? styles.buttonCamera : styles.buttonCameraPhoto}>
-          <Button
-            title={' '} // Ensure the title is a string
-            onPress={() => {
-              setTakingPhoto(false);
-              takePhoto();
-              // takePhoto(); // Call the takePhoto function
-            }} // Navigate to the Garden AR screen
-            color={'#000000'} // Use the theme color
+      <View style={styles.container}>
+        <ThemeView style={styles.cameraContainer}>
+          
+          <Camera
+            ref={cameraRef}
+            style={StyleSheet.absoluteFill}
+            device={device}
+            isActive={true}
+            photo={true}
           />
+          
+          <TouchableOpacity style={ isTakingPhoto ? styles.buttonCamera : styles.buttonCameraPhoto} onPress={capturePressed}></TouchableOpacity>
+            
+          <ThemeView style={styles.instructionContainer}>
+            <ThemeText style={styles.instructionText}>
+              Take a photo of the spot you want to transform into a garden
+            </ThemeText>
+          </ThemeView>
+          
         </ThemeView>
-        <ThemeView style={styles.instructionContainer}>
-          <ThemeText style={styles.instructionText}>Take a photo of the spot you want to transform into a garden</ThemeText>
-        </ThemeView>
-      </ThemeView>
+      </View>
     );
   }
   const renderImage = () => {
     return (
-      <ThemeView style={styles.imageContainer}>
-        <Image source={image} style={styles.image}></Image>
-        <ThemeView style={styles.ctaContainer}>
-          <ThemeView style={ styles.ctaWrapper }>
-            <ThemeCTA type='secondary' onPress={() => {
+      <View style={styles.container}>
+        <ThemeView style={styles.imageContainer}>
+          <Image source={image} style={styles.image}></Image>
+          <ThemeView style={styles.ctaContainer}>
+            <ThemeView style={ styles.ctaWrapper }>
+              <ThemeCTA type='secondary' onPress={() => {
                 setImage(null);
-                setTakingPhoto(true);
+                setIsTakingPhoto(true);
               }}>
-              Retake
-            </ThemeCTA>
+                Retake
+              </ThemeCTA>
+            </ThemeView>
+            <ThemeView style={styles.ctaWrapper2}>
+              <ThemeCTA type='primary' onPress={confirmPhoto}>
+                Confirm
+              </ThemeCTA>
+            </ThemeView>
           </ThemeView>
-          <ThemeView style={styles.ctaWrapper2}>
-            <ThemeCTA type='primary' onPress={() => {
-                confirmPhoto(); // Call the takePhoto function
-              }}>
-              Confirm
-            </ThemeCTA>
+          <ThemeView style={styles.instructionContainerBottom}>
+            <ThemeText style={styles.instructionText}>
+              Use this Photo?
+            </ThemeText>
           </ThemeView>
         </ThemeView>
-        <ThemeView style={styles.instructionContainerBottom}>
-          <ThemeText style={styles.instructionText}>Use this Photo?</ThemeText>
-        </ThemeView>
-      </ThemeView>
+      </View>
     );
   }
-  return (
-    <View style={styles.container}>
-      { image ? renderImage() : renderCamera() }
-    </View>
-  );
+  return image ? renderImage() : renderCamera();
 }
 
 const styles = StyleSheet.create({
@@ -130,8 +129,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 200,
     width: '100%',
-    padding: 20
-
+    padding: 20,
   },
   errorText: {
     fontFamily: 'LatoItalic',
@@ -156,28 +154,22 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   instructionContainer: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     top: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     backgroundColor: 'transparent',
     left: 20,
     right: 20,
     borderRadius: 20,
   },
   instructionContainerBottom: {
-    // width: '100%',
     height: 100,
     position: 'absolute',
     bottom: 175,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#000000', // transparent
-    // opacity:0.5,
     left: 20,
     right: 20,
     borderRadius: 20,
@@ -229,9 +221,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     position: 'absolute',
-    backgroundColor: 'grey', // transparent
+    backgroundColor: 'grey',
     objectFit: 'contain',
-    // borderRadius: 25,
     borderWidth: 0,
   },
   ctaContainer: {
@@ -244,16 +235,14 @@ const styles = StyleSheet.create({
     height: 165,
     padding: 10,
     backgroundColor: 'transparent',
-    
     alignContent: 'center',
     justifyContent: 'center',
     alignItems: 'center',
   },
   ctaWrapper: {
-    backgroundColor: 'transparent'
-    
+    backgroundColor: 'transparent',
   },
   ctaWrapper2: {
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   },
 });
