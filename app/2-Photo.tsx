@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Camera, useCameraPermission, getCameraDevice } from 'react-native-vision-camera';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { ThemeView } from './aa/ThemeView';
-import { ThemeText } from './aa/ThemeText';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Camera, getCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { ThemeCTA } from './aa/ThemeCTA';
+import { ThemeText } from './aa/ThemeText';
+import { ThemeView } from './aa/ThemeView';
 
 export default function PhotoScreen() {
   const router = useRouter();
@@ -95,7 +95,7 @@ export default function PhotoScreen() {
     return (
       <View style={styles.container}>
         <ThemeView style={styles.imageContainer}>
-          <Image source={image} style={styles.image}></Image>
+          <Image source={'file://' + image} style={styles.image}></Image>
           <ThemeView style={styles.ctaContainer}>
             <ThemeView style={ styles.ctaWrapper }>
               <ThemeCTA type='secondary' onPress={() => {

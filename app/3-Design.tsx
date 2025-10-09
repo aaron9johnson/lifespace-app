@@ -1,26 +1,26 @@
-import React, { useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
 import { Asset } from 'expo-asset';
-import * as THREE from 'three';
-import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useSharedValue, runOnJS } from 'react-native-reanimated';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Image } from 'expo-image';
-import { ThemeView } from './aa/ThemeView';
-import { ThemeText } from './aa/ThemeText';
-import { ThemeCTA } from './aa/ThemeCTA';
 import { ExpoWebGLRenderingContext, GLView } from 'expo-gl';
+import { Image } from 'expo-image';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import ExpoTHREE, { Renderer } from 'expo-three';
+import React, { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { runOnJS, useSharedValue } from 'react-native-reanimated';
+import * as THREE from 'three';
+import { ThemeCTA } from './aa/ThemeCTA';
+import { ThemeText } from './aa/ThemeText';
+import { ThemeView } from './aa/ThemeView';
 
-import GardenData, { Garden, GardenColor, GardenBuy } from './data/GardenData'
+import GardenData, { Garden, GardenColor } from './data/GardenData';
 const gardenData: Array<Garden> = GardenData();
 // import PlantData, { Plant, PlantInfo } from './data/PlantData'
 // const plantData: Array<Plant> = PlantData();
 
 export default function App() {
-  const SCALE_MIN = 0.1;
+  const SCALE_MIN = 0.01;
   const SCALE_MAX = 1.0;
-  const SCALE_INIT = 0.2;
+  const SCALE_INIT = 0.1;
 
   const glViewRef = useRef(null);
   const { image } = useLocalSearchParams<{ image: any; }>();
@@ -397,7 +397,7 @@ function updateTranslate(e) {
   return (
     <GestureHandlerRootView style={{ flex: 1, position: 'relative'}}>
 
-      <Image source={image} style={styles.image}></Image>
+      <Image source={'file://' + image} style={styles.image}></Image>
 
       <GestureDetector gesture={gesture}>
         <View style={styles.container}>
