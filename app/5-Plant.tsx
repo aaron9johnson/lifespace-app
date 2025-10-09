@@ -8,35 +8,82 @@ import { ThemeCTA } from "./aa/ThemeCTA";
 import { ThemeView } from "./aa/ThemeView";
 import { ThemeText } from "./aa/ThemeText";
 import Draggable from './Draggable';
+import DraggableTarget from './DraggableTarget';
 
-// import GardenData, { Garden, GardenColor, GardenBuy } from './data/GardenData'
-// const gardenData: Array<Garden> = GardenData();
-import PlantData, { getSeasonFromText, Plant, PlantInfo, PlantLight, PlantZone, ZoneData, ZoneInfo } from './data/PlantData'
+import PlantData, { getSeasonFromText, getTextFromLight, Plant, PlantLight, PlantZone, ZoneData, ZoneInfo, NullPlant } from './data/PlantData'
 const plantData: Array<Plant> = PlantData();
 const zoneData: Array<ZoneInfo> = ZoneData();
 
+import GardenData, { Garden } from "./data/GardenData";
+const gardenData = GardenData()
+
 export default function PlantScreen() {
   const router = useRouter();
-  const { image, gardens, types, models, conditions } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; }>();
-  console.log(conditions)
-
-  const zoneInfo: ZoneInfo = zoneData.find(data => data.zone == parseInt(conditions.split(',')[0]) as PlantZone) || zoneData[0];
-  const light: PlantLight = parseInt(conditions.split(',')[1]);
-  const filteredPlantData = plantData.filter((plant) => plant.light.includes(light) && plant.zones.includes(zoneInfo.zone));
+  const { image, gardens, types, models, conditions } = useLocalSearchParams<{ image: string; gardens: string; types: string; models: string; conditions: string; }>();
+  const zoneInfo: ZoneInfo = zoneData.find(data => data.zone == parseInt((conditions+'').split(',')[0]) as PlantZone) || zoneData[0];
+  const light: PlantLight = parseInt((conditions+'').split(',')[1]);
+  const filteredPlantData = plantData.filter(plant => plant.light.includes(light) && plant.zones.includes(zoneInfo.zone));
 
   const carouselInstanceRef = useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
 
   const [plantRefreshKey, setPlantRefreshKey] = useState(0);
-  const nullPlant = new Plant('',0,0,0,[],[],[],'','#000000',[]);
+
+  const nullPlant = NullPlant();
+
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+  const [checkDropPosition, setCheckDropPosition] = useState({x: 0, y: 0});
+
+  /*
+
+[ // gardens
+  [ // garden
+    [ // plant
+      nullPlant, nullPlant, nullPlant // 3 seasons
+    ]
+
+    ]
+  ]
   
-  const [drops, setDrops] = useState([
+  
+  */
+ console.log("types: ", types)
+  const plantingGardens: Array<Garden> = ((types+'').split(',').filter((type) => type != '').map((gardenType) => gardenData.find((garden) => garden.name == gardenType)) || []) as Array<Garden> ;
+  console.log("plantingGardens: ", plantingGardens)
+  const plantingGrid = plantingGardens.map((garden) => garden.grid).map((g) => {
+    let gardenRows = [];
+    for (let i = 0; i < g[0]; i++) { // row
+      let gardenColumns = [];
+      for (let j = 0; j < g[1]; j++) { // column
+        gardenColumns.push([nullPlant,nullPlant,nullPlant]); // nullPlant x3 for 3 seasons
+      }
+      gardenRows.push(gardenColumns);
+    }
+    return gardenRows;
+  });
+  console.log("plantingGrid: ", plantingGrid)
+
+  
+  const [drops, setDrops] = useState(plantingGrid); /*useState([
     [nullPlant, nullPlant, nullPlant],
     [nullPlant, nullPlant, nullPlant],
     [nullPlant, nullPlant, nullPlant]
-  ]);
+  ]);*/
 
-  const [isConfirmVisible, setIsConfirmVisible] = useState(false);
+
+  const targetGrid = plantingGardens.map((garden) => garden.grid).map((g) => {
+    let gardenRows = [];
+    for (let i = 0; i < g[0]; i++) { // row
+      let gardenColumns = [];
+      for (let j = 0; j < g[1]; j++) { // column
+        gardenColumns.push({x: i * 100 + 50, y: j * 100 + 50}); // nullPlant x3 for 3 seasons
+      }
+      gardenRows.push(gardenColumns);
+    }
+    return gardenRows;
+  });
+const [targets, setTargets] = useState(targetGrid);
+
 
   const data = [1,2,3];
 
@@ -65,40 +112,38 @@ export default function PlantScreen() {
         types:types,
         models: models,
         conditions: conditions,
-        plants: drops.map((i) => i.map((j) => j.name)).join(','),
+        plants: drops.map(gardens => gardens.map(rows => rows.map(squares => squares.map(square => square.name)))).join(','),
       }
     });
   };
 
-  const check3Plants = (i: number) => {
+  const check3Plants = (gardenIndex: number, row: number, column: number) => {
     // check to show confirm button - currently just fill first 3 to show
-    if (i != 1 && (!drops[0][0] || drops[0][0].color == nullPlant.color)) {
+    if (column != 1 && (!drops[0][0][0][0] || drops[0][0][0][0].color == nullPlant.color)) {
       return;
     }
-    if (i != 2 && (!drops[0][1] || drops[0][1].color == nullPlant.color)) {
+    if (column != 2 && (!drops[0][0][1][0] || drops[0][0][1][0].color == nullPlant.color)) {
       return;
     }
-    if (i != 3 && (!drops[0][2] || drops[0][2].color == nullPlant.color)) {
+    if (column != 3 && (!drops[0][0][2][0] || drops[0][0][2][0].color == nullPlant.color)) {
       return;
     }
     if (!isConfirmVisible){
       setIsConfirmVisible(true);
     }
   }
-  
-  const dropped = (i: number, plant: Plant) => {
-    const index = (carouselInstanceRef.current?.getCurrentIndex() || 0);
+
+  // Draggable succesfully dropped onto Target
+  const dropped = (gardenIndex: number, row: number, column: number, plant: Plant) => {
+    const seasonIndex = (carouselInstanceRef.current?.getCurrentIndex() || 0);
     setDrops((prevDrops) => {
       const newDrops = [...prevDrops];
-      newDrops[index][i - 1] = plant;
+      newDrops[gardenIndex][row][column][seasonIndex] = plant;
       return newDrops;
     });
-    check3Plants(i);
-    // setTimeout(() => {
-    //   setPlantRefreshKey(plantRefreshKey + 1); // refrsh colors
-    // }, 10);
+    check3Plants(gardenIndex, row, column);
     setPlantRefreshKey(plantRefreshKey + 1); // refrsh colors
-  };
+  }
   
   return (
     <View style={styles.mainContainer}>
@@ -110,28 +155,30 @@ export default function PlantScreen() {
       <Carousel
         ref={carouselInstanceRef}
         width={Dimensions.get("window").width}
-        height={200}
+        height={200 * drops.length}
         data={data}
         onProgressChange={progress}
         onScrollEnd={() => setPlantRefreshKey(plantRefreshKey + 1)}
         renderItem={({ index }) => (
           <View>
             <View style={styles.dropZone}>
-              <View style={[ drops[index][0].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][0].color }]}>
-                {drops[index][0].image ?
-                  <Image source={drops[index][0].planting} style={{ width: 94, height: 94, backgroundColor: drops[index][0].color }}/>
-                : <></>}
-              </View>
-              <View style={[ drops[index][1].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][1].color }]}>
-                {drops[index][1].image ?
-                  <Image source={drops[index][1].planting} style={{ width: 94, height: 94, backgroundColor: drops[index][1].color }}/>
-                : <></>}
-              </View>
-              <View style={[ drops[index][2].color != nullPlant.color ? styles.dropZone1 : styles.dropZone1f, { backgroundColor: drops[index][2].color }]}>
-                {drops[index][2].image ?
-                  <Image source={drops[index][2].planting} style={{ width: 94, height: 94, backgroundColor: drops[index][2].color }}/>
-                : <></>}
-              </View>
+              {drops.map((garden: Array<Array<Array<Plant>>>, gardenIndex: number) => (
+                <View style={{ flexDirection: 'column', borderWidth: 1, marginBottom: 5 }}>
+                  {garden.map((gardenRow: Array<Array<Plant>>, gardenRowIndex: number) => (
+                    <View style={{ flexDirection: 'row' }}>
+                      {gardenRow.map((gardenSquare: Array<Plant>, gardenSquareIndex: number) => (
+                        <DraggableTarget
+                          plant={gardenSquare[index]}
+                          season={index}
+                          positionGarden={gardenIndex}
+                          positionRow={gardenRowIndex}
+                          positionColumn={gardenRowIndex}
+                        ></DraggableTarget>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              ))}
             </View>
             <ThemeView style={styles.instructionContainer}>
               <TouchableOpacity style={styles.arrow} onPress={() => carouselInstanceRef.current?.prev()}>
@@ -158,10 +205,13 @@ export default function PlantScreen() {
         containerStyle={{ gap: 5, marginTop: 10 }}
         onPress={onPressPagination}
       />
-      <View style={styles.row} key={plantRefreshKey}> {/* ref={addDragableRef} */}
+      <ThemeText style={styles.filterText}>
+        { getTextFromLight(light) } - Zone { zoneInfo.zone.toString() } ({ zoneInfo.desc }) - { currentSeason(carouselInstanceRef.current?.getCurrentIndex() || 0) + "" }
+      </ThemeText>
+      <View style={styles.row} key={plantRefreshKey}>
         {filteredPlantData.filter((i: Plant) => i.seasons.includes(getSeasonFromText(currentSeason(carouselInstanceRef.current?.getCurrentIndex() || 0) + ""))).map((item: Plant, index: number) => (
-          <View style={{ width: 100, height: 100, margin: 5, zIndex: 9999 }}>
-            <Draggable dropped={dropped} plant={item}/>
+          <View key={index} style={{ width: 80, height: 80, margin: 2, zIndex: 9999 }}>
+            <Draggable dropped={dropped} targets={targets} plant={item}/>
           </View>
         ))}
       </View>
@@ -183,6 +233,20 @@ export default function PlantScreen() {
 }
 
 const styles = StyleSheet.create({
+  filterText:{
+    fontFamily: 'LatoLight',
+    fontSize: 16,
+    lineHeight: 16,
+    textAlign: 'left',
+    height: 16,
+    width: Dimensions.get("window").width - 70,
+    marginLeft: 35,
+    color: '#595959', // dark grey
+    marginTop: 25,
+    opacity: 0.25,
+    overflow: 'hidden',
+    textOverflow: 'elipses'
+  },
   arrow: {
     width: 32,
     height: 32, 
@@ -211,9 +275,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   ctaContainer: {
-    top: 80,
+    // top: 80,
     backgroundColor: 'white',
     padding: 16,
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0
   },
   mainContainer: {
     backgroundColor:'white',
@@ -227,12 +295,18 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
-    left: 75,
-    width: 335,
-    marginTop: 75,
+    left: 35,
+    width: Dimensions.get("window").width - 70,
+    // marginTop: 25,
+    marginTop: 0,
+    borderWidth: 1,
+    height: Dimensions.get("window").height - (575),
+    borderRadius: 4,
+    borderColor: '#595959', // dark grey
   },  
   dropZone: {
-    flexDirection: "row",
+    // flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     marginLeft: 50,
     marginTop: 50,

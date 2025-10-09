@@ -11,7 +11,7 @@ const plantData: Array<Plant> = PlantData();
 
 export default function BuyScreen() {
   const router = useRouter();
-  const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; plants: any; }>();
+  const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: string; gardens: string; types: string; models: string; conditions: string; plants: any; }>();
   const garden = gardenData.find((garden) => garden.name == types.split(',')[0]);
   const color = (garden?.colors || []).find((color) => color.name == models.split(',')[0]);
 
@@ -59,7 +59,7 @@ export default function BuyScreen() {
             <View>
               {item && item.icon ?
                 <Image source={item.icon} style={[styles.image,{ width: 50, height: 50 }]}></Image>
-              : <></>}
+              : null}
             </View>
           ))}
         </View>

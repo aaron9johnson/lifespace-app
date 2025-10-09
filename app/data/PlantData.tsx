@@ -24,6 +24,26 @@ export function getTextFromSeason(season: PlantSeason): string {
             return "Spring"
     }
 }
+export function getTextFromLight(light: PlantLight): string {
+    switch (light) {
+        case PlantLight.FULL_SUN:
+            return "Full Sun";
+        case PlantLight.PART_SUN:
+            return "Part Sun";
+        default:
+            return "No Sun";
+    }
+}
+export function getLightFromText(text: string): PlantLight {
+    switch (text) {
+        case "Full Sun":
+            return PlantLight.FULL_SUN;
+        case "Part Sun":
+            return PlantLight.PART_SUN;
+        default:
+            return PlantLight.FULL_SHADE;
+    }
+}
 export enum PlantLight {
     FULL_SUN,
     PART_SUN,
@@ -198,9 +218,10 @@ export class PlantInfo {
 export class Plant {
     // Properties (data)
     name: string;
-    image: number;
-    icon: number;
-    planting: number;
+    image: string;
+    icon: string;
+    planting: string;
+    holes: string;
     seasons: Array<PlantSeason>;
     zones: Array<PlantZone>;
     light: Array<PlantLight>;
@@ -209,11 +230,12 @@ export class Plant {
     gardening: Array<PlantInfo>
 
     // Constructor (for initializing properties)
-    constructor(name: string, image: number, icon: number, planting: number, seasons: Array<PlantSeason> = [], zones: Array<PlantZone> = [], light: Array<PlantLight> = [], description = '', color = '#000000', gardening: Array<PlantInfo> = []) {
+    constructor(name: string, image: string, icon: string, planting: string, holes: string, seasons: Array<PlantSeason> = [], zones: Array<PlantZone> = [], light: Array<PlantLight> = [], description = '', color = '#000000', gardening: Array<PlantInfo> = []) {
         this.name = name;
         this.image = image;
         this.icon = icon;
         this.planting = planting;
+        this.holes = holes;
         this.seasons = seasons;
         this.zones = zones;
         this.light = light;
@@ -227,6 +249,12 @@ export class Plant {
         
     // }
 }
+
+export function NullPlant(): Plant {
+    // Checks are made against NullPlant.color? (ex: plant.color != '#000000')
+    return new Plant('','','','','',[],[],[],'','#000000',[]); // TODO: replace nullPlant?
+}
+
 export default function PlantData(): Array<Plant> {
     return ([
         {
@@ -234,6 +262,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/arugula.png'),
             icon: require('@/assets/images/plants/arugula-icon.png'),
             planting: require('@/assets/images/plants/arugula-planting.png'),
+            holes: require('@/assets/images/plants/arugula-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.AUTUMN ],
             zones:[ PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -263,6 +292,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/radishes.png'),
             icon: require('@/assets/images/plants/radishes-icon.png'),
             planting: require('@/assets/images/plants/radishes-planting.png'),
+            holes: require('@/assets/images/plants/radishes-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.AUTUMN ],
             zones:[ PlantZone.ZONE_2, PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -292,6 +322,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/mesclun.png'),
             icon: require('@/assets/images/plants/mesclun-icon.png'),
             planting: require('@/assets/images/plants/mesclun-planting.png'),
+            holes: require('@/assets/images/plants/mesclun-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.SUMMER, PlantSeason.AUTUMN ],
             zones:[ PlantZone.ZONE_2, PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -329,6 +360,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/toms.png'),
             icon: require('@/assets/images/plants/toms-icon.png'),
             planting: require('@/assets/images/plants/toms-planting.png'),
+            holes: require('@/assets/images/plants/toms-holes.png'),
             seasons: [ PlantSeason.SUMMER, PlantSeason.AUTUMN ],
             zones:[ PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN ],
@@ -358,6 +390,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/basil.png'),
             icon: require('@/assets/images/plants/basil-icon.png'),
             planting: require('@/assets/images/plants/basil-planting.png'),
+            holes: require('@/assets/images/plants/basil-holes.png'),
             seasons: [ PlantSeason.SUMMER ],
             zones:[ PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -379,6 +412,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/spinach.png'),
             icon: require('@/assets/images/plants/spinach-icon.png'),
             planting: require('@/assets/images/plants/spinach-planting.png'),
+            holes: require('@/assets/images/plants/spinach-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.AUTUMN ],
             zones:[ PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -408,6 +442,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/scallions.png'),
             icon: require('@/assets/images/plants/scallions-icon.png'),
             planting: require('@/assets/images/plants/scallions-planting.png'),
+            holes: require('@/assets/images/plants/scallions-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.AUTUMN],
             zones:[ PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -437,6 +472,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/cilantro.png'),
             icon: require('@/assets/images/plants/cilantro-icon.png'),
             planting: require('@/assets/images/plants/cilantro-planting.png'),
+            holes: require('@/assets/images/plants/cilantro-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.AUTUMN],
             zones:[ PlantZone.ZONE_2, PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -466,6 +502,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/parsley.png'),
             icon: require('@/assets/images/plants/parsley-icon.png'),
             planting: require('@/assets/images/plants/parsley-planting.png'),
+            holes: require('@/assets/images/plants/parsley-holes.png'),
             seasons: [ PlantSeason.SPRING, PlantSeason.SUMMER, PlantSeason.AUTUMN],
             zones:[ PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -503,6 +540,7 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/dill.png'),
             icon: require('@/assets/images/plants/dill-icon.png'),
             planting: require('@/assets/images/plants/dill-planting.png'),
+            holes: require('@/assets/images/plants/dill-holes.png'),
             seasons: [ PlantSeason.SUMMER],
             zones:[ PlantZone.ZONE_2, PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
@@ -524,190 +562,248 @@ export default function PlantData(): Array<Plant> {
             image: require('@/assets/images/plants/kale.png'),
             icon: require('@/assets/images/plants/kale-icon.png'),
             planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
+            holes: require('@/assets/images/plants/kale-holes.png'),
+            seasons: [ PlantSeason.SPRING, PlantSeason.SUMMER, PlantSeason.AUTUMN ],
+            zones:[ PlantZone.ZONE_2, PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
             light:[ PlantLight.FULL_SUN ],
             description: "Kale is a leafy green vegetable, known for its nutritional value and versatility in cooking. It belongs to the cruciferous vegetable family, which includes broccoli, cabbage, and Brussels sprouts. Kale is available in various types, including curly kale, Lacinato kale (also known as dinosaur kale), and Russian kale, each with slightly different appearances and textures. It can be eaten raw in salads, cooked in various dishes, or even made into kale chips. ",
             color: '#f1f6ee',
             gardening: [
                 {
-                    season: PlantSeason.SUMMER,
-                    transplant: '',
+                    season: PlantSeason.SPRING,
+                    transplant: ' • Kale 1 per sq/ft',
                     seed: '',
                     nurture: '',
                     grow: '',
                     harvest: '',
+                },
+                {
+                    season: PlantSeason.SUMMER,
+                    transplant: '',
+                    seed: '',
+                    nurture: 'Spring planted kale will continue to grow through the summer into the autumn. Pick the bottom leaves and work your way up.',
+                    grow: '',
+                    harvest: '',
+                },
+                {
+                    season: PlantSeason.AUTUMN,
+                    transplant: '',
+                    seed: '',
+                    nurture: 'Kale will continue to grow through the winter months. It tastes sweeter in colder temperatures when it turnes starches into sugars.',
+                    grow: '',
+                    harvest: 'Hearty plants like Kale can survive over winter in some environments.',
                 }
             ]
         },
         {
             name: 'Lettuce',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
+            image: require('@/assets/images/plants/lettuce.png'),
+            icon: require('@/assets/images/plants/lettuce-icon.png'),
+            planting: require('@/assets/images/plants/lettuce-planting.png'),
+            holes: require('@/assets/images/plants/lettuce-holes.png'),
             seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
+            zones:[ PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9 ],
+            light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
+            description: "Lettuce is a leafy green vegetable, primarily known for its use in salads, but also used in sandwiches, wraps, and soups. It's a good source of vitamins and minerals, particularly beta carotene, folate, and vitamin C. There are different types of lettuce, with the main categories being head lettuce (including Butterhead, Boston, and Iceberg), Romaine (or Cos), and leaf lettuce.",
             color: '#f1f6ee',
             gardening: [
                 {
                     season: PlantSeason.SUMMER,
-                    transplant: '',
+                    transplant: ' • Head lettuce 4 per sq/ft',
                     seed: '',
                     nurture: '',
-                    grow: '',
-                    harvest: '',
+                    grow: 'Harvest head lettuce by taking the outer leaves of each plant, leaving 1/3 remaining growing, or harvest the entire head.',
+                    harvest: 'As September approaches, harvest remaining head lettuce.',
                 }
             ]
         },
         {
             name: 'Peas',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
+            image: require('@/assets/images/plants/peas.png'),
+            icon: require('@/assets/images/plants/peas-icon.png'),
+            planting: require('@/assets/images/plants/peas-planting.png'),
+            holes: require('@/assets/images/plants/peas-holes.png'),
+            seasons: [ PlantSeason.SPRING, PlantSeason.SUMMER, PlantSeason.AUTUMN ],
+            zones:[ PlantZone.ZONE_3, PlantZone.ZONE_4, PlantZone.ZONE_5, PlantZone.ZONE_6, PlantZone.ZONE_7, PlantZone.ZONE_8, PlantZone.ZONE_9, PlantZone.ZONE_10, PlantZone.ZONE_11 ],
+            light:[ PlantLight.FULL_SUN, PlantLight.PART_SUN ],
             description: "",
             color: '#f1f6ee',
             gardening: [
                 {
-                    season: PlantSeason.SUMMER,
-                    transplant: '',
-                    seed: '',
-                    nurture: '',
-                    grow: '',
-                    harvest: '',
-                }
-            ]
-        },
-        {
-            name: 'Carrots',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
-            color: '#f1f6ee',
-            gardening: [
+                    season: PlantSeason.SPRING,
+                    transplant: "If you'd like to get a head start on your peas, you can transplant them instaed of seeding.",
+                    seed: ' • Peas 16 per sq/ft\n   • Pro tip ssoak peas in water for 12-24 hours before planting.',
+                    nurture: 'Trellis your peas vertically in your garden. Thin seedlings to recomended spacing above.',
+                    grow: 'Pick peas off the vine when they are green and plump.',
+                    harvest: 'You may choose to continue peas into June.',
+                },
                 {
                     season: PlantSeason.SUMMER,
-                    transplant: '',
-                    seed: '',
-                    nurture: '',
-                    grow: '',
+                    transplant: "If you'd like to get a head start on your peas, you can transplant them instaed of seeding.",
+                    seed: ' Second set of peas in July, after spring planting has finished. This planting will produce in Sptember until hard freeze.',
+                    nurture: 'Trellis your peas vertically in your garden. Thin seedlings to recomended spacing above.',
+                    grow: 'Pick peas off the vine when they are green and plump.',
                     harvest: '',
-                }
-            ]
-        },
-        {
-            name: 'Beets',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
-            color: '#f1f6ee',
-            gardening: [
+                },
                 {
-                    season: PlantSeason.SUMMER,
+                    season: PlantSeason.AUTUMN,
                     transplant: '',
-                    seed: '',
+                    seed: 'Planting will produce in Sptember until hard freeze.',
                     nurture: '',
-                    grow: '',
+                    grow: 'Harvest peas up until hard frost.',
                     harvest: '',
-                }
-            ]
-        },
-        {
-            name: 'Bush Beans',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
-            color: '#f1f6ee',
-            gardening: [
-                {
-                    season: PlantSeason.SUMMER,
-                    transplant: '',
-                    seed: '',
-                    nurture: '',
-                    grow: '',
-                    harvest: '',
-                }
-            ]
-        },
-        {
-            name: 'Mustard',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
-            color: '#f1f6ee',
-            gardening: [
-                {
-                    season: PlantSeason.SUMMER,
-                    transplant: '',
-                    seed: '',
-                    nurture: '',
-                    grow: '',
-                    harvest: '',
-                }
-            ]
-        },
-        {
-            name: 'Cucumber',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
-            color: '#f1f6ee',
-            gardening: [
-                {
-                    season: PlantSeason.SUMMER,
-                    transplant: '',
-                    seed: '',
-                    nurture: '',
-                    grow: '',
-                    harvest: '',
-                }
-            ]
-        },
-        {
-            name: 'Peppers',
-            image: require('@/assets/images/plants/kale.png'),
-            icon: require('@/assets/images/plants/kale-icon.png'),
-            planting: require('@/assets/images/plants/kale-planting.png'),
-            seasons: [ PlantSeason.SUMMER],
-            zones:[ PlantZone.ZONE_5 ],
-            light:[ PlantLight.FULL_SUN ],
-            description: "",
-            color: '#f1f6ee',
-            gardening: [
-                {
-                    season: PlantSeason.SUMMER,
-                    transplant: '',
-                    seed: '',
-                    nurture: '',
-                    grow: '',
-                    harvest: '',
-                }
+                },
             ]
         }
+        // ,
+        // {
+        //     name: 'Carrots',
+        //     image: require('@/assets/images/plants/kale.png'),
+        //     icon: require('@/assets/images/plants/kale-icon.png'),
+        //     planting: require('@/assets/images/plants/kale-planting.png'),
+        //     holes: require('@/assets/images/plants/kale-holes.png'),
+        //     seasons: [ PlantSeason.SUMMER],
+        //     zones:[ PlantZone.ZONE_5 ],
+        //     light:[ PlantLight.FULL_SUN ],
+        //     description: "",
+        //     color: '#f1f6ee',
+        //     gardening: [
+        //         {
+        //             season: PlantSeason.SPRING,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         },
+        //         {
+        //             season: PlantSeason.SUMMER,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         },
+        //         {
+        //             season: PlantSeason.AUTUMN,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         }
+        //     ]
+        // },
+        // {
+        //     name: 'Beets',
+        //     image: require('@/assets/images/plants/kale.png'),
+        //     icon: require('@/assets/images/plants/kale-icon.png'),
+        //     planting: require('@/assets/images/plants/kale-planting.png'),
+        //     holes: require('@/assets/images/plants/kale-holes.png'),
+        //     seasons: [ PlantSeason.SUMMER],
+        //     zones:[ PlantZone.ZONE_5 ],
+        //     light:[ PlantLight.FULL_SUN ],
+        //     description: "",
+        //     color: '#f1f6ee',
+        //     gardening: [
+        //         {
+        //             season: PlantSeason.SUMMER,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         }
+        //     ]
+        // },
+        // {
+        //     name: 'Bush Beans',
+        //     image: require('@/assets/images/plants/kale.png'),
+        //     icon: require('@/assets/images/plants/kale-icon.png'),
+        //     planting: require('@/assets/images/plants/kale-planting.png'),
+        //     holes: require('@/assets/images/plants/kale-holes.png'),
+        //     seasons: [ PlantSeason.SUMMER],
+        //     zones:[ PlantZone.ZONE_5 ],
+        //     light:[ PlantLight.FULL_SUN ],
+        //     description: "",
+        //     color: '#f1f6ee',
+        //     gardening: [
+        //         {
+        //             season: PlantSeason.SUMMER,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         }
+        //     ]
+        // },
+        // {
+        //     name: 'Mustard',
+        //     image: require('@/assets/images/plants/kale.png'),
+        //     icon: require('@/assets/images/plants/kale-icon.png'),
+        //     planting: require('@/assets/images/plants/kale-planting.png'),
+        //     holes: require('@/assets/images/plants/kale-holes.png'),
+        //     seasons: [ PlantSeason.SUMMER],
+        //     zones:[ PlantZone.ZONE_5 ],
+        //     light:[ PlantLight.FULL_SUN ],
+        //     description: "",
+        //     color: '#f1f6ee',
+        //     gardening: [
+        //         {
+        //             season: PlantSeason.SUMMER,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         }
+        //     ]
+        // },
+        // {
+        //     name: 'Cucumber',
+        //     image: require('@/assets/images/plants/kale.png'),
+        //     icon: require('@/assets/images/plants/kale-icon.png'),
+        //     planting: require('@/assets/images/plants/kale-planting.png'),
+        //     holes: require('@/assets/images/plants/kale-holes.png'),
+        //     seasons: [ PlantSeason.SUMMER],
+        //     zones:[ PlantZone.ZONE_5 ],
+        //     light:[ PlantLight.FULL_SUN ],
+        //     description: "",
+        //     color: '#f1f6ee',
+        //     gardening: [
+        //         {
+        //             season: PlantSeason.SUMMER,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         }
+        //     ]
+        // },
+        // {
+        //     name: 'Peppers',
+        //     image: require('@/assets/images/plants/kale.png'),
+        //     icon: require('@/assets/images/plants/kale-icon.png'),
+        //     planting: require('@/assets/images/plants/kale-planting.png'),
+        //     holes: require('@/assets/images/plants/kale-holes.png'),
+        //     seasons: [ PlantSeason.SUMMER],
+        //     zones:[ PlantZone.ZONE_5 ],
+        //     light:[ PlantLight.FULL_SUN ],
+        //     description: "",
+        //     color: '#f1f6ee',
+        //     gardening: [
+        //         {
+        //             season: PlantSeason.SUMMER,
+        //             transplant: '',
+        //             seed: '',
+        //             nurture: '',
+        //             grow: '',
+        //             harvest: '',
+        //         }
+        //     ]
+        // }
     ]);
 }
 

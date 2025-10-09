@@ -44,7 +44,7 @@ export default function HomeAllScreen() {
                   }}>
                     <Text style={{ textAlign: "center", fontSize: 30 }}>Garden {index + 1}</Text>
                     <Image style={index % 2 == 0 ? styles.block : styles.block2} source={image}></Image>
-                    {gardens ? <Image style={[styles.block, {marginTop: -300}]} source={gardens}></Image> : <></>}
+                    {gardens ? <Image style={[styles.block, {marginTop: -300}]} source={gardens}></Image> : null}
                     <Text style={{ textAlign: "left", fontSize: 30 }}>Next Task:</Text>
                     <Text style={{ textAlign: "left", fontSize: 30 }}>Harvest Tomatoes</Text>
                   </ThemeView>

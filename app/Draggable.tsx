@@ -3,12 +3,19 @@ import React, { Component } from "react";
 import { StyleSheet, View, PanResponder, Animated } from "react-native";
 import { Plant } from "./data/PlantData";
 
+export interface DraggableDropped {
+  plant: Plant;
+  targets: Array<Array<Array<any>>>;
+  dropped(x: number, y: number, plant: Plant): Boolean;
+}
+
 export default class Draggable extends Component {
-  constructor(props) {
+  constructor(props: DraggableDropped) {
     super(props);
     this.state = {
       plant: props.plant,
-      dropped: props.dropped as (i: number, plant: Plant) => {},
+      targets: props.targets,
+      dropped: props.dropped,
       showDraggable: true,
       dropAreaValues: null,
       pan: new Animated.ValueXY(),
@@ -36,17 +43,27 @@ export default class Draggable extends Component {
     });
   }
   checkDrop(e, gesture){
+    const targetWidth = 100;
+    const leftSpacing = 50;
+    const topSpacing = 50;
+    const gardenSpacing = 50;
+
+    // gesture.moveX
+    // gesture.moveY
+    // check is drop position is within targets
     let remove = false;
-    if (gesture.moveY < 200 + 50 + 50){
-      if (gesture.moveX > 0 + 50 && gesture.moveX < 100 + 50){
-        remove = true;
-        e.state.dropped(1, e.state.plant);
-      } else if (gesture.moveX > 100 + 50 && gesture.moveX < 200 + 50){
-        remove = true;
-        e.state.dropped(2, e.state.plant);
-      } else if (gesture.moveX > 200 + 50 && gesture.moveX < 300 + 50){
-        remove = true;
-        e.state.dropped(3, e.state.plant);
+    targetLoop: for (let i = 0; i < this.state.targets.length; i++){
+      let target = this.state.targets[i];
+      for (let j = 0; j < target.length; j++){
+        let row = target[j];
+        for (let k = 0; k < row.length; k++){
+          let column = row[k];
+          if (column.x <= gesture.moveX && column.x + targetWidth >= gesture.moveX && column.y <= gesture.moveY && column.y + targetWidth >= gesture.moveY){
+            e.state.dropped(i, j, k, e.state.plant);
+            remove = true;
+            break targetLoop;
+          }
+        }
       }
     }
     if (remove) {
@@ -66,7 +83,7 @@ export default class Draggable extends Component {
   }
   render() {
     return (
-      <View style={{ width: "20%", alignItems: "center" }}>
+      <View style={{ width: 80, height: 80, alignItems: "center" }}>
         { this.renderDraggable() }
       </View>
     );
@@ -78,9 +95,9 @@ export default class Draggable extends Component {
     if (this.state.showDraggable) {
       return (
         <View style={{ position: "absolute"}}>
-          <View style={{ backgroundColor: this.state.plant.color, width: 100, height: 100 , borderRadius: 8 }}>
-            <Animated.View {...this.panResponder.panHandlers} style={[panStyle, styles.circle, { opacity:this.state.opacity }]}>
-              <Image source={this.state.plant.image} style={{ width: 80, height: 80, margin: 10, backgroundColor: 'transparent' }}></Image>
+          <View style={{ backgroundColor: this.state.plant.color, width: 80, height: 80 , borderRadius: 8 }}>
+            <Animated.View {...this.panResponder.panHandlers} style={[panStyle, { opacity:this.state.opacity }]}>
+              <Image source={this.state.plant.image} style={{ width: 70, height: 70, margin: 5, backgroundColor: 'transparent' }}></Image>
             </Animated.View>
           </View>
         </View>
@@ -89,11 +106,5 @@ export default class Draggable extends Component {
   }
 }
 
-let CIRCLE_RADIUS = 30;
 const styles = StyleSheet.create({
-  circle: {
-    width: CIRCLE_RADIUS * 2,
-    height: CIRCLE_RADIUS * 2,
-    borderRadius: CIRCLE_RADIUS
-  }
 });

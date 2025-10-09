@@ -1,38 +1,40 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput} from 'react-native';
+import { View, StyleSheet, TextInput } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemeView } from './aa/ThemeView';
 import { ThemeText } from './aa/ThemeText';
 import { ThemeCTA } from './aa/ThemeCTA';
 import Entypo from '@expo/vector-icons/Entypo';
-import { PlantLight, PlantZone, ZoneData, cityToZone } from './data/PlantData';
 
+import { PlantLight, PlantZone, ZoneData, ZoneInfo, cityToZone } from './data/PlantData';
 const zoneData = ZoneData();
 
 export default function ConditionsScreen() {
   const router = useRouter();
-  const { image, gardens, types, models } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; }>();
+  const { image, gardens, types, models } = useLocalSearchParams<{ image: string; gardens: string; types: string; models: string; }>();
   const [isChangingLocation, setIsChangingLocation] = useState(false);
   const [inputText, setInputText] = useState('');
   const [cityText, setCityText] = useState('Vancouver BC');
   const [plantZone, setPlantZone] = useState(PlantZone.ZONE_8);
 
   const checkCity = () => {
-    const city = inputText;
-    const info = cityToZone(city, zoneData);
+    const city: string = inputText;
+    const info: ZoneInfo = cityToZone(city, zoneData);
     if (info.zone != PlantZone.ZONE_0) {
       setPlantZone(info.zone)
       setCityText(city);
       setIsChangingLocation(false);
     } else {
       // no city found
-      setCityText(city+"?");
+      setCityText(city + "?"); // TODO: replace append ? to bad search...
       setIsChangingLocation(false);
     }
   }
   const confirmPhoto = (light: PlantLight) => {
-    const conditions = plantZone.toString() + ',' + light;
+    const conditions = '' + plantZone.toString() + ',' + light.toString() + '';
+    // const params = ;
+      // console.log('params: ',params)
     router.push({ 
       pathname: '/5-Plant',
       params: {
@@ -48,8 +50,8 @@ export default function ConditionsScreen() {
     <View style={styles.container}>
       <ThemeView style={styles.imageContainer}>
         
-        {!isChangingLocation ? <Image source={image} style={styles.image}></Image> : <></>}
-        {!isChangingLocation ? <Image source={gardens} style={[styles.image, { backgroundColor: 'transparent' }]}></Image> : <></>}
+        {/* {!isChangingLocation ? <Image source={image} style={styles.image}></Image> : null}
+        {!isChangingLocation ? <Image source={gardens} style={[styles.image, { backgroundColor: 'transparent' }]}></Image> : null} */}
         
         <ThemeView style={styles.instructionContainer}>
           <ThemeText style={styles.titleText}>
@@ -59,7 +61,7 @@ export default function ConditionsScreen() {
         <ThemeView style={styles.instructionContainerBottom}>
 
           {isChangingLocation ?
-            <View style={{ marginTop: -450 }}>
+            <View style={{  }}>
               <ThemeText style={styles.instructionText}>Enter your City</ThemeText>
               <TextInput
                 style={styles.input}
@@ -80,14 +82,49 @@ export default function ConditionsScreen() {
                 }
 
               </ThemeView>
+              <ThemeView style={{ marginTop: 10, backgroundColor: 'white' }}>
+
+                <ThemeCTA type='borderless' onPress={() => {
+                  setCityText(" ");
+                  setPlantZone(PlantZone.ZONE_6);
+                  setIsChangingLocation(false);
+                }}>Zone 6</ThemeCTA>
+
+                <ThemeCTA type='borderless' onPress={() => {
+                  setCityText(" ");
+                  setPlantZone(PlantZone.ZONE_7);
+                  setIsChangingLocation(false);
+                }}>Zone 7</ThemeCTA>
+
+                <ThemeCTA type='borderless' onPress={() => {
+                  setCityText(" ");
+                  setPlantZone(PlantZone.ZONE_8);
+                  setIsChangingLocation(false);
+                }}>Zone 8</ThemeCTA>
+
+                <ThemeCTA type='borderless' onPress={() => {
+                  setCityText(" ");
+                  setPlantZone(PlantZone.ZONE_9);
+                  setIsChangingLocation(false);
+                }}>Zone 9</ThemeCTA>
+
+                <ThemeCTA type='borderless' onPress={() => {
+                  setCityText(" ");
+                  setPlantZone(PlantZone.ZONE_10);
+                  setIsChangingLocation(false);
+                }}>Zone 10</ThemeCTA>
+
+              
+                
+              </ThemeView>
 
             </View>
           :
           // isChangingLocation == false
             <>
-              <ThemeText style={styles.instructionText}>
+              {cityText.trim() != '' ? <ThemeText style={styles.instructionText}>
                 Location: <ThemeText style={[styles.instructionText, { fontFamily: 'LatoBold' }]}>{ cityText }</ThemeText>
-              </ThemeText>
+              </ThemeText> : null}
 
               <ThemeView style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent'}}>
                 <ThemeText style={styles.instructionText}>
@@ -168,28 +205,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 32,
     color: '#595959',
+    marginBottom: 16,
   },
   instructionContainer: {
-    height: 100,
-    position: 'absolute',
     top: 20,
+    // marginBottom: 20,
+    marginBottom: 'auto',
+    // height: 100,
+    // position: 'absolute',
+    // top: 20,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
-    left: 20,
-    right: 20,
+    // left: 20,
+    // right: 20,
     borderRadius: 20,
   },
   instructionContainerBottom: {
-    height: 100,
-    position: 'absolute',
-    bottom: 275,
+    // height: 100,
+    // position: 'absolute',
+    // bottom: 275,
+    // bottom: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    left: 20,
-    right: 20,
+    // left: 20,
+    // right: 20,
     borderRadius: 20,
     backgroundColor: 'transparent',
+    marginBottom: 200
   },
   container: {
     width: '100%',

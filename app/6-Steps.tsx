@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useRef } from 'react';
@@ -9,8 +9,6 @@ import { ThemeView } from './aa/ThemeView';
 import { useSharedValue } from 'react-native-reanimated';
 import { ThemeText } from './aa/ThemeText';
 
-// import GardenData, { Garden, GardenColor, GardenBuy } from './data/GardenData'
-// const gardenData: Array<Garden> = GardenData();
 import PlantData, { getSeasonFromText, Plant, PlantInfo } from './data/PlantData'
 const plantData: Array<Plant> = PlantData();
 
@@ -20,8 +18,8 @@ export default function StepsScreen() {
   const progress = useSharedValue<number>(0);
 
   const router = useRouter();
-  const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: any; gardens: any; types: any; models: any; conditions: any; plants: any; }>();
-  const plantsView: Array<Plant> = plants.split(',').map((plantName: string) => plantData.find((plant: Plant) => plant.name == plantName));
+  const { image, gardens, types, models, conditions, plants } = useLocalSearchParams<{ image: string; gardens: string; types: string; models: string; conditions: string; plants: string; }>();
+  const plantsView: Array<Plant> = plants.split(',').map((plantName: string) => plantData.find((plant: Plant) => plant.name == plantName)) as Array<Plant>
   const viewData: Array<PlantInfo> = [new PlantInfo(), new PlantInfo(), new PlantInfo()];
 
   const shopPressed = () => {
@@ -62,6 +60,16 @@ export default function StepsScreen() {
       default: return '';
     }
   }
+  const renderCheckbox = () => {
+    return (
+      <ThemeView>
+        <ThemeText>
+          []
+        </ThemeText>
+        </ThemeView>
+
+    );
+  }
   
   plantsView.forEach((value: Plant, index: number) => {
     if (!value) return;
@@ -71,19 +79,19 @@ export default function StepsScreen() {
     let season = value.gardening.find((info: PlantInfo) => info.season == getSeasonFromText(pageName));
     if (season){
       if (season.grow != '' && !page.grow.includes(season.grow)) {
-        page.grow += season.grow + '\n'
+        page.grow += renderCheckbox() + season.grow + '\n'
       }
       if (season.harvest != '' && !page.harvest.includes(season.harvest)) {
-        page.harvest += season.harvest + '\n'
+        page.harvest += renderCheckbox() + season.harvest + '\n'
       }
       if (season.nurture != '' && !page.nurture.includes(season.nurture)) {
-        page.nurture += season.nurture + '\n'
+        page.nurture += renderCheckbox() + season.nurture + '\n'
       }
       if (season.seed != '' && !page.seed.includes(season.seed)) {
-        page.seed += season.seed + '\n'
+        page.seed += renderCheckbox() + season.seed + '\n'
       }
       if (season.transplant != '' && !page.transplant.includes(season.transplant)) {
-        page.transplant += season.transplant + '\n'
+        page.transplant += renderCheckbox() + season.transplant + '\n'
       }
       viewData[pageIndex] = page; // Do I need this?
     }
@@ -139,7 +147,7 @@ export default function StepsScreen() {
                 <ThemeText style={styles.slideStepContent}>
                   {page.seed}
                 </ThemeText>
-              </> : <></>
+              </> : null
             }
             {page.transplant != '' ?
               <>
@@ -151,7 +159,7 @@ export default function StepsScreen() {
                 <ThemeText style={styles.slideStepContent}>
                   { page.transplant }
                 </ThemeText>
-              </> : <></>
+              </> : null
             }
             {page.nurture != '' ?
               <>
@@ -163,7 +171,7 @@ export default function StepsScreen() {
                 <ThemeText style={styles.slideStepContent}>
                   { page.nurture }
                 </ThemeText>
-              </> : <></>
+              </> : null
             }
             {page.grow != '' ?
               <>
@@ -175,7 +183,7 @@ export default function StepsScreen() {
                 <ThemeText style={styles.slideStepContent}>
                   { page.grow }
                 </ThemeText>
-              </> : <></>
+              </> : null
             }
           </ScrollView>
         </ThemeView>

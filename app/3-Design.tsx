@@ -1,18 +1,18 @@
-import React, { useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
 import { Asset } from 'expo-asset';
-import * as THREE from 'three';
-import { GestureDetector, Gesture, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useSharedValue, runOnJS } from 'react-native-reanimated';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Image } from 'expo-image';
-import { ThemeView } from './aa/ThemeView';
-import { ThemeText } from './aa/ThemeText';
-import { ThemeCTA } from './aa/ThemeCTA';
 import { ExpoWebGLRenderingContext, GLView } from 'expo-gl';
+import { Image } from 'expo-image';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import ExpoTHREE, { Renderer } from 'expo-three';
+import React, { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { runOnJS, useSharedValue } from 'react-native-reanimated';
+import * as THREE from 'three';
+import { ThemeCTA } from './aa/ThemeCTA';
+import { ThemeText } from './aa/ThemeText';
+import { ThemeView } from './aa/ThemeView';
 
-import GardenData, { Garden, GardenColor, GardenBuy } from './data/GardenData'
+import GardenData, { Garden, GardenColor } from './data/GardenData';
 const gardenData: Array<Garden> = GardenData();
 // import PlantData, { Plant, PlantInfo } from './data/PlantData'
 // const plantData: Array<Plant> = PlantData();
@@ -236,6 +236,7 @@ function updateTranslate(e) {
       onAssetRequested: (m: string) => Asset.fromModule(model.daeImages[m]).downloadAsync(),
       onProgress: () => {}
     });
+    // console.log("obj.scene:", obj.scene)
     return obj.scene;
   }
 
@@ -275,6 +276,11 @@ function updateTranslate(e) {
     object.position.sub(center); // move geometry to center
     
     setModelCount(modelCount + 1);
+
+    let tempTypes = [...gardenTypes];
+    tempTypes[activeGarden - 1][0] = 'LowRider' // new models always LowRider / Raw Cedar
+    tempTypes[activeGarden - 1][1] = 'Raw Cedar'; // model.name;
+    setGardenTypes(tempTypes);
   };
   
   const updateObjects = () => {
@@ -310,8 +316,8 @@ function updateTranslate(e) {
   }
 
   const onContextCreate = async (gl: ExpoWebGLRenderingContext) => {
-    const pixelStorei = gl.pixelStorei.bind(gl); // removes the warning EXGL: gl.pixelStorei() doesn't support this parameter yet!
-    gl.pixelStorei = function(...args){const [parameter]=args;switch(parameter){case gl.UNPACK_FLIP_Y_WEBGL:return pixelStorei(...args)}};
+    // const pixelStorei = gl.pixelStorei.bind(gl); // removes the warning EXGL: gl.pixelStorei() doesn't support this parameter yet!
+    // gl.pixelStorei = function(...args){const [parameter]=args;switch(parameter){case gl.UNPACK_FLIP_Y_WEBGL:return pixelStorei(...args)}};
 
     // Setup
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
@@ -375,7 +381,7 @@ function updateTranslate(e) {
         params: {
           image: image,
           gardens: snapshot,
-          types: gardenTypes.map((i) => i[0]).join(','),
+          types: gardenTypes.map((i) => i[0]).join(','), // ['LowRider', 'HighRise', '']
           models: gardenTypes.map((i) => i[1]).join(','),
         }
       });
@@ -397,7 +403,7 @@ function updateTranslate(e) {
   return (
     <GestureHandlerRootView style={{ flex: 1, position: 'relative'}}>
 
-      <Image source={image} style={styles.image}></Image>
+      <Image source={'file://' + image} style={styles.image}></Image>
 
       <GestureDetector gesture={gesture}>
         <View style={styles.container}>
@@ -437,7 +443,7 @@ function updateTranslate(e) {
             )}
           </ScrollView>
         </ThemeView>
-      :<></>}
+      :null}
 
       <ThemeView style={isColorPickerOpen ? styles.instructionContainer : styles.instructionContainerNoColor}>
         <ThemeText style={styles.instructionText}>
